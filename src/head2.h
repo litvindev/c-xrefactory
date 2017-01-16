@@ -21,11 +21,11 @@
 #define SIZE_TMP_MEM		       5000	/* temporary strings, not error messages */
 
 #define SIZE_ppMemory 	  	      20000	/* macro args name in define */
-#define SIZE_mbMemory 		     500000	/* pending macro expansions */
+#define SIZE_mbMemory 		    2000000	/* pending macro expansions */
 #define SIZE_opiMemory		     150000	/* memory used to store options strings */
 #define SIZE_workMemory        10000000	/* parsing stack memory */
-#define SIZE_tmpWorkMemory       200000	/* additional tmp parsing stack memory */
-#define SIZE_ftMemory 		    4000000	/* memory for file (and class) table */
+#define SIZE_tmpWorkMemory       400000	/* additional tmp parsing stack memory */
+#define SIZE_ftMemory 		    8000000	/* memory for file (and class) table */
 
 #define SIZE_ppmMemory	       15000000	/* macro definitions or java class files */
 #ifdef SMALL_OLCX_MEMORY
@@ -34,9 +34,9 @@
 #define SIZE_olcxMemory        15000000	/* memory for browsing symbol stack */
 #endif
 #ifdef LINEAR_ADD_REFERENCE
-#define CX_MEMORY_CHUNK_SIZE   10000000	
+#define CX_MEMORY_CHUNK_SIZE   20000000
 #else
-#define CX_MEMORY_CHUNK_SIZE	2000000	
+#define CX_MEMORY_CHUNK_SIZE	4000000
 #endif
                                         /* memory for cross references, can be
                                           increased also by -mf command line
