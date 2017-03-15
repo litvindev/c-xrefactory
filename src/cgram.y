@@ -59,8 +59,6 @@
 
 #define CrTypeModifier(xxx,ttt) {\
 		xxx = crSimpleTypeMofifier(ttt);\
-		xxx = StackMemAlloc(S_typeModifiers);\
-		FILLF_typeModifiers(xxx, ttt,f,( NULL,NULL) ,NULL,NULL);\
 }
 
 #define AddComposedType(ddd, ttt) appendComposedType(&ddd->u.type, ttt)
