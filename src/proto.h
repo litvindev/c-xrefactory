@@ -698,6 +698,7 @@ struct idIdent {
 	char 		*name;
 	S_symbol	*sd;		/* if yet in symbol table */
 	S_position	p;			/* position */
+	S_idIdent   *next;
 };
 
 struct freeTrail {
@@ -1134,9 +1135,10 @@ struct javaStat {
 /* java composed names */
 
 struct idIdentList {
-	S_idIdent 		idi;
+	S_idIdent		idi;
 	char			*fname;			/* fqt name for java */
 	uchar			nameType;		/* type of name segment for java */
+	S_idIdentList	*down;
 	S_idIdentList	*next;
 };
 
@@ -2272,8 +2274,9 @@ int findStrRecordSym C_ARG((	S_recFindStr *ss,
 					));
 S_symbol *addNewSymbolDef C_ARG((S_symbol *p, unsigned storage, S_symTab *tab, int usage));
 S_symbol *addNewCopyOfSymbolDef C_ARG((S_symbol *def, unsigned defaultStorage));
-S_symbol *addNewDeclaration C_ARG((S_symbol *btype, S_symbol *decl, 
+S_symbol *addNewDeclaration C_ARG((S_symbol *btype, S_symbol *decl, S_idIdentList *idl,
 							unsigned storage, S_symTab *tab));
+void addInitializerRefs(S_typeModifiers *t,	S_idIdentList *idl);
 int styyerror C_ARG((char *s));
 int styyErrorRecovery C_ARG(());
 void setToNull C_ARG((void *p));

@@ -588,9 +588,39 @@ S_symbol *addNewCopyOfSymbolDef(S_symbol *def, unsigned storage) {
 	return(p);
 }
 
+void addInitializerRefs(
+						S_typeModifiers *t,
+						S_idIdentList *idl
+						) {
+	S_idIdentList *ll;
+	S_idIdent* id;
+	S_typeModifiers *tt;
+	S_reference *ref;
+	S_symbol *rec;
+	for(ll=idl; ll!=NULL; ll=ll->next) {
+		tt = t;
+		rec = NULL;
+		for (id = &ll->idi; id!=NULL; id=id->next) {
+			if (tt->m == TypeArray) {
+				tt = tt->next;
+				continue;
+			}
+			if (tt->m != TypeStruct && tt->m != TypeUnion) return;
+			ref = findStrRecordFromType(tt, id, &rec, CLASS_TO_ANY);
+			if (NULL == ref) return;
+			assert(rec);
+			tt = rec->u.type;
+		}
+		if (ll->down!=NULL && rec!=NULL) {
+			addInitializerRefs(rec->u.type, ll->down);
+		}
+	}
+}
+
 S_symbol *addNewDeclaration(
 							S_symbol *btype,
-							S_symbol *decl, 
+							S_symbol *decl,
+							S_idIdentList *idl,
 							unsigned storage,
 							S_symTab *tab
 							) {
@@ -605,6 +635,7 @@ S_symbol *addNewDeclaration(
 	if (decl->u.type->m == TypeFunction) usage = UsageDeclared;
 	else if (decl->b.storage == StorageExtern) usage = UsageDeclared;
 	addNewSymbolDef(decl, storage, tab, usage);
+	addInitializerRefs(decl->u.type, idl);
 	return(decl);
 }
 

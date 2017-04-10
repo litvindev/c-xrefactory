@@ -467,7 +467,7 @@
 #define SET_IDENTIFIER_YYLVAL(name, symb, pos) {\
 	uniyylval->bbidIdent.d = &s_yyIdentBuf[s_yyIdentBufi];\
 	s_yyIdentBufi ++; s_yyIdentBufi %= (YYBUFFERED_ID_INDEX);\
-	FILL_idIdent(uniyylval->bbidIdent.d, name, symb, pos);\
+	FILL_idIdent(uniyylval->bbidIdent.d, name, symb, pos, NULL);\
 	yytext = name;\
 	uniyylval->bbidIdent.b = pos;\
 	uniyylval->bbidIdent.e = pos;\

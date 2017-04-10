@@ -762,7 +762,7 @@ Name:
 SimpleName:
 		IDENTIFIER				{
 			$$.d = StackMemAlloc(S_idIdentList);
-			FILL_idIdentList($$.d, *$1.d, $1.d->name, TypeDefault, NULL);
+			FILL_idIdentList($$.d, *$1.d, $1.d->name, TypeDefault, NULL,NULL);
 			PropagateBornsIfRegularSyntaxPass($$, $1, $1);
 		}
 	;
@@ -770,7 +770,7 @@ SimpleName:
 QualifiedName:
 		Name '.' IDENTIFIER		{
 			$$.d = StackMemAlloc(S_idIdentList);
-			FILL_idIdentList($$.d, *$3.d, $3.d->name, TypeDefault, $1.d);
+			FILL_idIdentList($$.d, *$3.d, $3.d->name, TypeDefault, NULL,$1.d);
 			PropagateBornsIfRegularSyntaxPass($$, $1, $3);
 		}
 	;
@@ -2336,7 +2336,7 @@ LocalVarDeclUntilInit:
 		Type VariableDeclaratorId							{
 			if (RegularPass()) {
 				if (! SyntaxPassOnly()) {
-					addNewDeclaration($1.d,$2.d,StorageAuto,s_javaStat->locals);
+					addNewDeclaration($1.d,$2.d,NULL,StorageAuto,s_javaStat->locals);
 					$$.d = $1.d;
 				} else {
 					PropagateBorns($$, $1, $2);
@@ -2346,7 +2346,7 @@ LocalVarDeclUntilInit:
 	|	FINAL Type VariableDeclaratorId						{
 			if (RegularPass()) {
 				if (! SyntaxPassOnly()) {
-					addNewDeclaration($2.d,$3.d,StorageAuto,s_javaStat->locals);
+					addNewDeclaration($2.d,$3.d,NULL,StorageAuto,s_javaStat->locals);
 					$$.d = $2.d;
 				} else {
 					PropagateBorns($$, $1, $3);
@@ -2357,7 +2357,7 @@ LocalVarDeclUntilInit:
 			if (RegularPass()) {
 				if (! SyntaxPassOnly()) {
 					if ($1.d->b.symType != TypeError) {
-						addNewDeclaration($1.d,$3.d,StorageAuto,s_javaStat->locals);
+						addNewDeclaration($1.d,$3.d,NULL,StorageAuto,s_javaStat->locals);
 					}
 					$$.d = $1.d;
 				} else {

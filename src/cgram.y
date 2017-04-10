@@ -260,6 +260,8 @@
 %type <bbidIdent> IDENTIFIER identifier struct_identifier enum_identifier
 %type <bbidIdent> str_rec_identifier STRUCT UNION struct_or_union
 %type <bbidIdent> user_defined_type TYPE_NAME
+%type <bbidIdent> designator designator_list
+%type <bbidlist> designation_opt initializer initializer_list initializer_list_opt eq_initializer_opt
 %type <bbinteger> assignment_operator
 %type <bbinteger> pointer CONSTANT _ncounter_ _nlabel_ _ngoto_ _nfork_
 %type <bbunsign> storage_class_specifier type_specifier1
@@ -500,17 +502,19 @@ unary_operator
 
 cast_expr
 	: unary_expr						/* { $$.d = $1.d; } */
-	| '(' type_name ')' cast_expr		{ 
-		$$.d.t = $2.d; 
+	| '(' type_name ')' cast_expr		{
+		$$.d.t = $2.d;
 		$$.d.r = $4.d.r;
 	}
-	| '(' type_name ')' '{' initializer_list '}'		{ /* GNU-extension*/
-		$$.d.t = $2.d; 
+	| '(' type_name ')' '{' initializer_list_opt '}'		{ /* GNU-extension*/
+		$$.d.t = $2.d;
 		$$.d.r = NULL;
+		addInitializerRefs($2.d, $5.d);
 	}
 	| '(' type_name ')' '{' initializer_list ',' '}'	{ /* GNU-extension*/
-		$$.d.t = $2.d; 
+		$$.d.t = $2.d;
 		$$.d.r = NULL;
+		addInitializerRefs($2.d, $5.d);
 	}
 	;
 
@@ -703,15 +707,15 @@ declaration
 	;
 
 init_declarations
-	: declaration_specifiers init_declarator			{		
+	: declaration_specifiers init_declarator eq_initializer_opt	{
 		$$.d = $1.d;
-		addNewDeclaration($1.d, $2.d, StorageAuto,s_symTab);
-	} eq_initializer_opt
-	| init_declarations ',' init_declarator 			{
+		addNewDeclaration($1.d, $2.d, $3.d, StorageAuto, s_symTab);
+	}
+	| init_declarations ',' init_declarator eq_initializer_opt	{
 		$$.d = $1.d;
-		addNewDeclaration($1.d, $3.d, StorageAuto,s_symTab);
-	} eq_initializer_opt
-	| error												{
+		addNewDeclaration($1.d, $3.d, $4.d, StorageAuto, s_symTab);
+	}
+	| error								{
 		/* $$.d = &s_errorSymbol; */
 		$$.d = typeSpecifier2(&s_errorModifier);
 	}
@@ -831,8 +835,12 @@ asm_opt:
 	|	ASM_KEYWORD '(' string_literales ')'
 	;
 
-eq_initializer_opt:
-	| '=' initializer
+eq_initializer_opt:		{
+		$$.d = NULL;
+	}
+	| '=' initializer	{
+		$$.d = $2.d;
+	}
 	;
 
 init_declarator
@@ -1346,19 +1354,72 @@ abstract_declarator2
 	;
 
 initializer
-	: assignment_expr
-      /* it is enclosed because on linux kernel it overflows memory */
-	| '{' initializer_list '}'
-	| '{' initializer_list ',' '}'
-	| error
+	: assignment_expr		{
+		$$.d = NULL;
+	}
+	  /* it is enclosed because on linux kernel it overflows memory */
+	| '{' initializer_list_opt '}'	{
+		$$.d = $2.d;
+	}
+	| '{' initializer_list ',' '}'	{
+		$$.d = $2.d;
+	}
+	| error				{
+		$$.d = NULL;
+	}
+	;
+
+initializer_list_opt:		{
+		$$.d = NULL;
+	}
+	| initializer_list		{
+		$$.d = $1.d;
+	}
 	;
 
 initializer_list
-	: Sv_tmp Start_block initializer Stop_block	{
+	: Sv_tmp designation_opt initializer	{
+		$$.d = $2.d;
+		if ($$.d!=NULL)	$$.d->down = $3.d;
 		tmpWorkMemoryi = $1.d;
 	}
-	| initializer_list ',' Sv_tmp Start_block initializer Stop_block	{
+	| initializer_list ',' Sv_tmp designation_opt initializer	{
+		LIST_APPEND(S_idIdentList, $1.d, $4.d);
+		if ($4.d!=NULL) $4.d->down = $5.d;
 		tmpWorkMemoryi = $3.d;
+	}
+	;
+
+designation_opt:				{
+		$$.d = NULL;
+	}
+	| designator_list '='		{
+		$$.d = StackMemAlloc(S_idIdentList);
+		FILL_idIdentList($$.d, *$1.d, $1.d->name, TypeDefault, NULL,NULL);
+	}
+	;
+
+designator_list
+	: designator					{
+		$$.d = $1.d;
+	}
+	| designator_list designator	{
+		LIST_APPEND(S_idIdent, $1.d, $2.d);
+	}
+	;
+
+designator
+	: '[' constant_expr ']'							{
+		$$.d = StackMemAlloc(S_idIdent);
+		FILL_idIdent($$.d, "", NULL, s_noPos, NULL);
+	}
+	| '[' constant_expr ELIPSIS constant_expr ']'	{
+		$$.d = StackMemAlloc(S_idIdent);
+		FILL_idIdent($$.d, "", NULL, s_noPos, NULL);
+	}
+	| '.' str_rec_identifier						{
+		$$.d = StackMemAlloc(S_idIdent);
+		*($$.d) = *($2.d);
 	}
 	;
 
@@ -1681,17 +1742,17 @@ external_definition
 top_init_declarations
 	: declaration_specifiers init_declarator eq_initializer_opt			{		
 		$$.d = $1.d;
-		addNewDeclaration($1.d, $2.d, StorageExtern,s_symTab);
+		addNewDeclaration($1.d, $2.d, $3.d, StorageExtern,s_symTab);
 	}
-	| init_declarator eq_initializer_opt									{
+	| init_declarator eq_initializer_opt						{
 		$$.d = & s_defaultIntDefinition;
-		addNewDeclaration($$.d, $1.d, StorageExtern,s_symTab);
+		addNewDeclaration($$.d, $1.d, $2.d, StorageExtern,s_symTab);
 	}
 	| top_init_declarations ',' init_declarator eq_initializer_opt			{
 		$$.d = $1.d;
-		addNewDeclaration($1.d, $3.d, StorageExtern,s_symTab);
+		addNewDeclaration($1.d, $3.d, $4.d, StorageExtern,s_symTab);
 	}
-	| error												{
+	| error										{
 		/* $$.d = &s_errorSymbol; */
 		$$.d = typeSpecifier2(&s_errorModifier);
 	}

@@ -267,6 +267,8 @@ static void addYaccSymbolReference C_ARG((S_idIdent *name, int usage));
 %type <bbidIdent> str_rec_identifier STRUCT UNION struct_or_union
 %type <bbidIdent> user_defined_type TYPE_NAME lexem
 %type <bbinteger> pointer CONSTANT rule_body
+%type <bbidIdent> designator designator_list
+%type <bbidlist> designation_opt initializer initializer_list initializer_list_opt eq_initializer_opt
 %type <bbunsign> storage_class_specifier type_specifier1
 %type <bbunsign> type_modality_specifier Sv_tmp
 %type <bbsymbol> init_declarator declarator declarator2 struct_declarator
@@ -364,7 +366,7 @@ symbol_to_type_seq:
 			ss->u.type = NULL;
 			addYaccSymbolReference($2.d,UsageDeclared);
 			if (l_currentType!=NULL) {
-				addNewDeclaration(l_currentType, ss, StorageAuto,s_symTab);
+				addNewDeclaration(l_currentType, ss, NULL, StorageAuto, s_symTab);
 			}
 		}
 	;
@@ -658,17 +660,19 @@ unary_operator
 
 cast_expr
 	: unary_expr						/* { $$.d = $1.d; } */
-	| '(' type_name ')' cast_expr		{ 
-		$$.d.t = $2.d; 
+	| '(' type_name ')' cast_expr		{
+		$$.d.t = $2.d;
 		$$.d.r = $4.d.r;
 	}
-	| '(' type_name ')' '{' initializer_list '}'		{ /* GNU-extension*/
-		$$.d.t = $2.d; 
+	| '(' type_name ')' '{' initializer_list_opt '}'		{ /* GNU-extension*/
+		$$.d.t = $2.d;
 		$$.d.r = NULL;
+		addInitializerRefs($2.d, $5.d);
 	}
 	| '(' type_name ')' '{' initializer_list ',' '}'	{ /* GNU-extension*/
-		$$.d.t = $2.d; 
+		$$.d.t = $2.d;
 		$$.d.r = NULL;
+		addInitializerRefs($2.d, $5.d);
 	}
 	;
 
@@ -844,11 +848,11 @@ declaration
 init_declarations
 	: declaration_specifiers init_declarator			{		
 		$$.d = $1.d;
-		addNewDeclaration($1.d, $2.d, StorageAuto,s_symTab);
+		addNewDeclaration($1.d, $2.d, NULL, StorageAuto,s_symTab);
 	}
 	| init_declarations ',' init_declarator				{
 		$$.d = $1.d;
-		addNewDeclaration($1.d, $3.d, StorageAuto,s_symTab);
+		addNewDeclaration($1.d, $3.d, NULL, StorageAuto,s_symTab);
 	}
 	| error												{
 		/*$$.d = &s_errorSymbol;*/
@@ -1435,19 +1439,73 @@ abstract_declarator2
 	;
 
 initializer
-	: assignment_expr
-	| '{' Start_block initializer_list Stop_block '}'
-	| '{' Start_block initializer_list ',' Stop_block '}'
+	: assignment_expr		{
+		$$.d = NULL;
+	}
+	  /* it is enclosed because on linux kernel it overflows memory */
+	| '{' initializer_list_opt '}'	{
+		$$.d = $2.d;
+	}
+	| '{' initializer_list ',' '}'	{
+		$$.d = $2.d;
+	}
+	| error				{
+		$$.d = NULL;
+	}
+	;
+
+initializer_list_opt:		{
+		$$.d = NULL;
+	}
+	| initializer_list		{
+		$$.d = $1.d;
+	}
 	;
 
 initializer_list
-	: Sv_tmp initializer	{
+	: Sv_tmp designation_opt initializer	{
+		$$.d = $2.d;
+		if ($$.d!=NULL)	$$.d->down = $3.d;
 		tmpWorkMemoryi = $1.d;
 	}
-	| initializer_list ',' Sv_tmp initializer	{
+	| initializer_list ',' Sv_tmp designation_opt initializer	{
+		LIST_APPEND(S_idIdentList, $1.d, $4.d);
+		if ($4.d!=NULL) $4.d->down = $5.d;
 		tmpWorkMemoryi = $3.d;
 	}
-	| error
+	;
+
+designation_opt:				{
+		$$.d = NULL;
+	}
+	| designator_list '='		{
+		$$.d = StackMemAlloc(S_idIdentList);
+		FILL_idIdentList($$.d, *$1.d, $1.d->name, TypeDefault, NULL,NULL);
+	}
+	;
+
+designator_list
+	: designator					{
+		$$.d = $1.d;
+	}
+	| designator_list designator	{
+		LIST_APPEND(S_idIdent, $1.d, $2.d);
+	}
+	;
+
+designator
+	: '[' constant_expr ']'							{
+		$$.d = StackMemAlloc(S_idIdent);
+		FILL_idIdent($$.d, "", NULL, s_noPos, NULL);
+	}
+	| '[' constant_expr ELIPSIS constant_expr ']'	{
+		$$.d = StackMemAlloc(S_idIdent);
+		FILL_idIdent($$.d, "", NULL, s_noPos, NULL);
+	}
+	| '.' str_rec_identifier						{
+		$$.d = StackMemAlloc(S_idIdent);
+		*($$.d) = *($2.d);
+	}
 	;
 
 statement
@@ -1609,15 +1667,15 @@ external_definition
 top_init_declarations
 	: declaration_specifiers init_declarator			{		
 		$$.d = $1.d;
-		addNewDeclaration($1.d, $2.d, StorageExtern,s_symTab);
+		addNewDeclaration($1.d, $2.d, NULL, StorageExtern,s_symTab);
 	}
 	| init_declarator									{
 		$$.d = & s_defaultIntDefinition;
-		addNewDeclaration($$.d, $1.d, StorageExtern,s_symTab);
+		addNewDeclaration($$.d, $1.d, NULL, StorageExtern,s_symTab);
 	}
 	| top_init_declarations ',' init_declarator			{
 		$$.d = $1.d;
-		addNewDeclaration($1.d, $3.d, StorageExtern,s_symTab);
+		addNewDeclaration($1.d, $3.d, NULL, StorageExtern,s_symTab);
 	}
 	| error												{
 		/*$$.d = &s_errorSymbol;*/
@@ -1730,7 +1788,7 @@ static void addRuleLocalVariable(S_idIdent *name, int order) {
 			FILL_symbolBits(&ss->b,0,0,0,0,0,TypeDefault,StorageAuto,0);
 			FILL_symbol(ss,nn,nn,name->p,ss->b,type,NULL,NULL);
 			ss->pos.coll ++ ; // to avoid ambiguity of NonTerminal <-> $$.d
-			addNewDeclaration(p, ss, StorageAuto, s_symTab);
+			addNewDeclaration(p, ss, NULL, StorageAuto, s_symTab);
 		}
 	}
 }
