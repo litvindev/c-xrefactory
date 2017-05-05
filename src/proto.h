@@ -501,6 +501,7 @@ enum storages {
 	StorageExtern,
 	StorageConstant,		/* enumerator definition */
 	StorageStatic,
+	StorageThreadLocal,
 	StorageTypedef,
 	StorageMutable,
 	StorageRegister,
@@ -530,6 +531,7 @@ enum types {
 	TypeLongSignedInt ,
 	TypeFloat ,
 	TypeDouble ,
+	TypeBoolean,
 	TypeStruct,
 	TypeUnion,
 	TypeEnum ,
@@ -558,7 +560,6 @@ enum types {
 	TypeByte,
 	TypeShort,
 	TypeLong,
-	TypeBoolean,
 	TypeNull,
 	TypeOverloadedFunction,
 	TypeReserve7,
