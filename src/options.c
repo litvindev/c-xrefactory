@@ -29,10 +29,7 @@ static char *s_standardCOptions[] = {
 	"-D__LINE__=0",
 	"-D__DATE__=\"__DATE__\"",
 	"-D__TIME__=\"__TIME__\"",
-	"-D__STDC__=1",
-	"-D__ptr_t=void*",
-	"-D__wchar_t=int",
-
+	"-I", "/usr/include/",
 #if defined (__WIN32__) || defined (__OS2__)			/*SBD*/
 	"-D_based(xxx)=",
 	"-D__based(xxx)=",
@@ -40,33 +37,13 @@ static char *s_standardCOptions[] = {
 	"-I", "\\Program Files\\DevStudio\\VC\\include\\",
 	"-I", "C:\\Program Files\\DevStudio\\VC\\include\\",
 	"-I", "D:\\Program Files\\DevStudio\\VC\\include\\",
-#else													/*SBD*/
-	"-I", "/usr/include/",
 #endif													/*SBD*/
 #ifdef __mygnulinux__	/*SBD*/
-	"-Dlinux=1",
-	"-D__linux=1",
-	"-D__linux__=1",
-	"-Dunix=1",
-	"-D__unix=1",
-	"-D__unix__=1",
-/*
-	"-Di386=1",
-	"-D__i386=1",
-	"-D__i386__=1",
-	"-D__i486__=1",
-*/
-	"-D__GNUC__=2",
-	"-D__GNUC_MINOR__=7",
-	"-D__ELF__=1",
 	"-D__attribute__(xxx) ",
-	"-D__alignof__(xxx) 8", 
+	"-D__alignof__(xxx) 8",
+	"-Dtypeof(xxx) int",
 	"-D__typeof__(xxx) int",
 	"-D__gnuc_va_list void",
-	"-I", "/usr/lib/g++-include/",
-	"-I", "/usr/lib/gcc-lib/*/*/include/",
-	"-I", "/usr/include/g++/",
-	"-I", "/usr/include/g++/std/",
 #endif			/*SBD*/
 
 };
@@ -79,33 +56,16 @@ static char *s_standardCccOptions[] = {
 	"-set", "dq", "\"",
 	"-set", "pc", "%",
 	"-set", "dl", "$",
-	"-D__cplusplus__",
-	"-D__cplusplus",
 	"-D__FILE__=\"__FILE__\"",
 	"-D__LINE__=0",
 	"-D__DATE__=\"__DATE__\"",
 	"-D__TIME__=\"__TIME__\"",
-	"-D__STDC__=1",
 	"-I", "/usr/include/",
-
 #ifdef __mygnulinux__	/*SBD*/
-	"-Dlinux=1",
-	"-D__linux=1",
-	"-D__linux__=1",
-	"-Dunix=1",
-	"-D__unix=1",
-	"-D__unix__=1",
-	"-D__GNUC__=2",
-	"-D__GNUC_MINOR__=7",
-	"-D__ELF__=1",
 	"-D__attribute__(xxx) ",
-	"-D__alignof__(xxx) 8", 
-/*	"-D__typeof__(xxx) ", */
-	"-D__asm__(xxx) {}",
-	"-I", "/usr/lib/g++-include/",
-	"-I", "/usr/lib/gcc-lib/*/*/include/",
-	"-I", "/usr/include/g++/",
-	"-I", "/usr/include/g++/std",
+	"-D__alignof__(xxx) 8",
+	"-Dtypeof(xxx) int",
+	"-D__typeof__(xxx) int",
 #endif			/*SBD*/
 
 };

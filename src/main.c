@@ -2162,7 +2162,7 @@ static int getLineFromFile(FILE *ff, char *tt, int ttsize, int *outI) {
 	return(res);
 }
 
-static void getAndProcessGccOptions() {
+static void getAndProcessGccIncludeOptions() {
 	char tt[MAX_OPTION_LEN];
 	int len,c,isActiveSect;
 	char *ttt, *lang;
@@ -2197,6 +2197,34 @@ static void getAndProcessGccOptions() {
 					 && (stt.st_mode & S_IFMT) == S_IFDIR) {
 			mainAddStringListOption(&s_opt.includeDirs, tt);
 		}
+	}
+	fclose(ff);
+	removeFile(ttt);
+}
+
+static void getAndProcessGccDefineOptions() {
+	char tt[MAX_OPTION_LEN];
+	int len,c;
+	char *ttt, *lang;
+	FILE *ff;
+	struct stat stt;
+	if (LANGUAGE(LAN_C) || LANGUAGE(LAN_YACC)) {
+	  lang = "c";
+	}
+	else if (LANGUAGE(LAN_CCC)) {
+	  lang = "c++";
+	}
+	else {
+	  return;
+	}
+	ttt = crTmpFileName_st();
+	assert(strlen(ttt)+1 < MAX_FILE_NAME_SIZE);
+	sprintf(tmpBuff, "LANG=C cpp -dM -x %s -o %s /dev/null 1>/dev/null 2>&1", lang, ttt);
+	system(tmpBuff);
+	ff = fopen(ttt,"r");
+	if (ff==NULL) return;
+	while (getLineFromFile(ff,tt,MAX_OPTION_LEN,&len) != EOF) {
+	  if (strncmp(tt,"#define",7)==0) addMacroDefinedByOption(tt+7);
 	}
 	fclose(ff);
 	removeFile(ttt);
@@ -2352,7 +2380,8 @@ static void mainFileProcessingInitialisations(
 		tmpIncludeDirs = s_opt.includeDirs;
 		s_opt.includeDirs = NULL;
 		getAndProcessXrefrcOptions(dffname, dffsect, dffsect);
-		getAndProcessGccOptions();
+		getAndProcessGccIncludeOptions();
+		getAndProcessGccDefineOptions();
 		LIST_APPEND(S_stringList, s_opt.includeDirs, tmpIncludeDirs);
 		if (s_opt.taskRegime != RegimeEditServer && s_input_file_name == NULL) {
 			*outInputIn = 0;
