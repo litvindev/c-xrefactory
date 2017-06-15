@@ -1297,7 +1297,7 @@ static void cxAddCollateReference( char *sym, char *cs, S_position *pos ) {
 static void collate(char **albcc, char **abcc, char *buf, int *absize, 
 					char **ancc, S_lexInput *actArgs) {
 	char *lbcc,*bcc,*cc,*ccfin,*cc0,*ncc,*cc1,*occ;
-	int line, val, lex, nlex, len1, bsize, nlt,len;
+	int line, val, lex, nlex, len1, bsize, nlt, len, cch;
 	S_position pos,respos;
 	unsigned hash;
 	ncc = *ancc;
@@ -1365,6 +1365,23 @@ static void collate(char **albcc, char **abcc, char *buf, int *absize,
 			assert(*bcc==0);
 			bcc++;
 			PutLexPosition(respos.file,respos.line,respos.coll,bcc);
+		}
+	}
+	if (lbcc!=NULL && cc < ccfin && NextLexToken(lbcc) == CONSTANT) {
+		nlex = NextLexToken(cc);
+		if (IS_IDENTIFIER_LEXEM(nlex) || nlex == CONSTANT
+					|| nlex == LONG_CONSTANT || nlex == FLOAT_CONSTANT
+					|| nlex == DOUBLE_CONSTANT ) {
+			GetLexToken(lex, cc);
+			occ = cc;
+			PassLex(cc, lex, line, val, hash, respos, len, 0);
+			if (IS_IDENTIFIER_LEXEM(lex)) {
+				GetLexChar(cch, occ);
+				for(; cch=='l'||cch=='L'||cch=='u'||cch=='U'; ) {
+					if (cch=='l' || cch=='L') PutLexToken(LONG_CONSTANT, lbcc);
+					GetLexChar(cch, occ);
+				}
+			}
 		}
 	}
 	TestPPBufOverflow(bcc,buf,bsize);
