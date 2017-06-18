@@ -380,7 +380,7 @@ void printOneCompletion(S_olCompletion *olc) {
 		fprintf(ccOut,"<%s %s=\"%s\" %s=%d %s=%d>", PPC_MULTIPLE_COMPLETION_LINE,
 				PPCA_VCLASS, olc->vclass,
 				PPCA_VALUE, olc->jindent,
-				PPCA_LEN, strlen(olc->fullName));
+				PPCA_LEN, (int)strlen(olc->fullName));
 		fprintf(ccOut, "%s", olc->fullName);
 		fprintf(ccOut, "</%s>\n", PPC_MULTIPLE_COMPLETION_LINE);
 	} else {

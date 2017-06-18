@@ -671,7 +671,7 @@ static void olGetAvailableRefactorings() {
 }
 
 
-static int olcxOnlyParseNoPushing(opt) {
+static int olcxOnlyParseNoPushing(int opt) {
 	return(
 		opt==OLO_GLOBAL_UNUSED
 		|| opt==OLO_LOCAL_UNUSED
@@ -1782,7 +1782,7 @@ static void linePosProcess(	FILE *off,
 		ppcIndentOffset();
 		fprintf(off, "<%s %s=%d %s=%d>%s</%s>\n", 
 				PPC_SRC_LINE, PPCA_REFN, linerefn,
-				PPCA_LEN, strlen(s_crefListLine), 
+				PPCA_LEN, (int)strlen(s_crefListLine),
 				s_crefListLine, PPC_SRC_LINE);
 	}
 	*rrr = rr;
@@ -5055,7 +5055,7 @@ void mainAnswerEditAction() {
 			fprintf(ccOut,"*");
 			//&printSymbolLinkNameString(ccOut, s_cps.setTargetAnswerClass);
 			// very risky, will need a lot of adjustements in xref.el
-			fprintf(ccOut, s_cps.setTargetAnswerClass);
+			fprintf(ccOut, "%s", s_cps.setTargetAnswerClass);
 		} else {
 			error(ERR_ST, "Not a valid target position. The cursor has to be on a place where a new field/method can be inserted.");
 		}

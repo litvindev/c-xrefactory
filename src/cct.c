@@ -81,7 +81,7 @@ void cctDump(S_cctNode *cc, int deep) {
 		fprintf(dumpOut,"%*sNULL\n",deep,""); fflush(dumpOut);
 		return;
 	}
-	fprintf(dumpOut,"%*s%x\n",deep,"",cc->node); fflush(dumpOut);
+	fprintf(dumpOut,"%*s%p\n",deep,"",cc->node); fflush(dumpOut);
 	if (cc->sub == NULL) return;
 	for(i=0; i<CCT_TREE_INDEX; i++) cctDump(&cc->sub[i], deep+2);
 }

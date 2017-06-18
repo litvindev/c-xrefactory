@@ -1172,11 +1172,11 @@ void editorDumpRegionList(S_editorRegionList *mml) {
 	//ppcGenTmpBuff();
 	for(mm=mml; mm!=NULL; mm=mm->next) {
 		if (mm->r.b == NULL || mm->r.e == NULL) {
-			sprintf(tmpBuff,"%d: [null]", mm);
+			sprintf(tmpBuff,"%p: [null]", mm);
 			fprintf(dumpOut,"%s\n",tmpBuff);
 			//ppcGenTmpBuff();
 		} else {
-			sprintf(tmpBuff,"%d: [%s: %d - %d] --> %c - %c", mm, simpleFileName(mm->r.b->buffer->name), mm->r.b->offset, mm->r.e->offset, CHAR_ON_MARKER(mm->r.b), CHAR_ON_MARKER(mm->r.e));
+			sprintf(tmpBuff,"%p: [%s: %d - %d] --> %c - %c", mm, simpleFileName(mm->r.b->buffer->name), mm->r.b->offset, mm->r.e->offset, CHAR_ON_MARKER(mm->r.b), CHAR_ON_MARKER(mm->r.e));
 			fprintf(dumpOut,"%s\n",tmpBuff);
 			//ppcGenTmpBuff();
 		}
@@ -1191,7 +1191,7 @@ void editorDumpUndoList(S_editorUndo *uu) {
 	while (uu!=NULL) {
 		switch (uu->operation) {
 		case UNDO_REPLACE_STRING:
-			sprintf(tmpBuff,"replace string [%s:%d] %d (%d)%s %d", uu->buffer->name, uu->u.replace.offset, uu->u.replace.size, uu->u.replace.str, uu->u.replace.str, uu->u.replace.strlen);
+			sprintf(tmpBuff,"replace string [%s:%d] %d (%p)%s %d", uu->buffer->name, uu->u.replace.offset, uu->u.replace.size, uu->u.replace.str, uu->u.replace.str, uu->u.replace.strlen);
 			if (strlen(uu->u.replace.str)!=uu->u.replace.strlen) fprintf(dumpOut,"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			fprintf(dumpOut,"%s\n",tmpBuff);
 			break;

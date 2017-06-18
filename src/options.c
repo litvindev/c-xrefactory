@@ -865,7 +865,7 @@ void getXrefrcFileName(char *ttt) {
 	int hlen;
 	char *hh;
 	if (s_opt.xrefrc!=NULL) {
-		sprintf(ttt, normalizeFileName(s_opt.xrefrc, s_cwd));
+		sprintf(ttt, "%s", normalizeFileName(s_opt.xrefrc, s_cwd));
 		return;
 	}
 	hh = getenv("HOME");

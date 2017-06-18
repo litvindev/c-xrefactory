@@ -20,12 +20,12 @@ static void dumpProgram(S_programGraphNode *program) {
 	S_programGraphNode *p;
 	fprintf(dumpOut,"[ProgramDump]\n");
 	for(p=program; p!=NULL; p=p->next) {
-		fprintf(dumpOut,"%x: %2d %2d %s %s",p,
+		fprintf(dumpOut,"%p: %2d %2d %s %s",p,
 			p->posBits,p->stateBits,
 			p->symRef->name,
 			usagesName[p->ref->usg.base]+5);
 		if (p->symRef->b.symType==TypeLabel && p->ref->usg.base!=UsageDefined) {
-			fprintf(dumpOut," %x",p->jump);
+			fprintf(dumpOut," %p",p->jump);
 		}
 		fprintf(dumpOut,"\n");
 	}

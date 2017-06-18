@@ -3,7 +3,7 @@
 
 /* ******************** a simple memory handler ************************ */
 
-#define ALLIGNEMENT_OFF(xxx,allign) (allign-1-((((unsigned)(xxx))-1) & (allign-1)))
+#define ALLIGNEMENT_OFF(xxx,allign) (allign-1-((((unsigned long)(xxx))-1) & (allign-1)))
 #define ALLIGNEMENT(xxx,allign) (((char*)(xxx))+ALLIGNEMENT_OFF(xxx,allign))
 
 

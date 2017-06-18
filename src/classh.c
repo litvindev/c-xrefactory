@@ -248,7 +248,7 @@ static void olcxMenuGenNonVirtualGlobSymList( FILE *ff, S_olSymbolsMenu *ss) {
 		}
 		olcxPrintMenuItemPrefix(ff, ss, 1);
 		sprintfSymbolLinkName(ttt, ss);
-		fprintf(ff," %s=%d>%s</%s>\n", PPCA_LEN, strlen(ttt), ttt, PPC_SYMBOL);
+		fprintf(ff," %s=%d>%s</%s>\n", PPCA_LEN, (int)strlen(ttt), ttt, PPC_SYMBOL);
 	} else {
 		fprintf(ff,"\n");
 		olcxPrintMenuItemPrefix(ff, ss, 1);
@@ -297,7 +297,7 @@ static void olcxMenuPrintClassHierarchyLine( FILE *ff, int fInd,
 									  s_opt.nestedClassDisplaying);
 	if (s_opt.xref2) {
 		if (THEBIT(tmpChProcessed,fInd)) fprintf(ff," %s=1", PPCA_TREE_UP);
-		fprintf(ff, " %s=%d>%s</%s>\n", PPCA_LEN, strlen(cname), cname, PPC_CLASS);
+		fprintf(ff, " %s=%d>%s</%s>\n", PPCA_LEN, (int)strlen(cname), cname, PPC_CLASS);
 	} else {
 		if (THEBIT(tmpChProcessed,fInd)) fprintf(ff,"(%s) -> up", cname);
 		else fprintf(ff,"%s", cname);

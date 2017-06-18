@@ -474,7 +474,7 @@ static void htmlGenFrameFile(FILE *ff, int fnum, char *thisfn) {
 	char	ffn[MAX_FILE_NAME_SIZE];
 	assert(s_fileTab.tab[fnum]);
 	fprintf(ff,"<HTML><HEAD><TITLE>Xref-Html Frames</TITLE></HEAD>\n");
-	fprintf(ff,"<frameset cols=\"20%,80%\">\n");
+	fprintf(ff,"<frameset cols=\"20%%,80%%\">\n");
 
 	fprintf(ff,"<frame src=\"%s%s\" name=\"packageFrame\">\n",
 			htmlGetLinkFileNameStatic(getDefaultCxFileStatic(),thisfn),
@@ -697,7 +697,7 @@ static char *htmlStSymbolCode(S_symbolRefItem *r, int usage) {
 	char ttt[MAX_CX_SYMBOL_SIZE];
 	char *sss, *tt;
 	if (r->b.category==CatLocal) {
-		sprintf(ss,"local.%x",r);
+		sprintf(ss,"local.%p",r);
 	} else {
 		if (r->vApplClass == s_noneFileIndex) {
 			sprintf(ss,"%s.%s", typesName[r->b.symType], r->name);

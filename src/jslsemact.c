@@ -240,8 +240,8 @@ S_symbol *jslMethodHeader(unsigned modif, S_symbol *type,
 		addMethodCxReferences(modif, decl, s_jsl->classStat->thisClass);
 	}
 	if (newFun) {
-		DPRINTF4("[jsl] adding method %s==%s to %s (at %x)\n",decl->name, 
-				 decl->linkName, s_jsl->classStat->thisClass->linkName);
+		DPRINTF5("[jsl] adding method %s==%s to %s (at %p)\n",decl->name,
+				 decl->linkName, s_jsl->classStat->thisClass->linkName, decl);
 		LIST_APPEND(S_symbol, s_jsl->classStat->thisClass->u.s->records, decl);
 	}
 	decl->u.type->u.m.sig = strchr(decl->linkName, '(');
@@ -337,7 +337,7 @@ static void jslAddNestedClass(S_symbol *inner, S_symbol *outer, int memb,
 	assert(outer && outer->b.symType==TypeStruct && outer->u.s);
 	n = outer->u.s->nnested;
 //&sprintf(tmpBuff,"adding nested %s of %s(at %d)[%d] --> %s to %s\n", inner->name, outer->name, outer, n, inner->linkName, outer->linkName);ppcGenTmpBuff();
-	DPRINTF7("adding nested %s of %s(at %d)[%d] --> %s to %s\n", inner->name, outer->name, outer, n, inner->linkName, outer->linkName);
+	DPRINTF7("adding nested %s of %s(at %p)[%d] --> %s to %s\n", inner->name, outer->name, outer, n, inner->linkName, outer->linkName);
 	if (n == 0) {
 		CF_ALLOCC(outer->u.s->nest, MAX_INNERS_CLASSES, S_nestedSpec);
 	}
