@@ -682,9 +682,10 @@ S_tokenNameIni s_tokenNameIniTab[] = {
 	{"'STRING_LITERAL'", 		STRING_LITERAL		,LAN_C},
 #ifdef DEBUG
 	{"'IDENTIFIER'",			IDENTIFIER			,LAN_C},
-	{"'LINE_TOK'", 				LINE_TOK			,LAN_C},
-	{"'BLOCK_MARKER'", 			OL_MARKER_TOKEN		,LAN_C},
-	{"#INCLUDE", 				CPP_INCLUDE		,LAN_C},
+	{"'LINE_TOK'",				LINE_TOK			,LAN_C},
+	{"'BLOCK_MARKER'",			OL_MARKER_TOKEN		,LAN_C},
+	{"#INCLUDE",				CPP_INCLUDE			,LAN_C},
+	{"#INCLUDENEXT",			CPP_INCLUDENEXT	,LAN_C},
 	{"#DEFINE0",				CPP_DEFINE0		,LAN_C},
 	{"#DEFINE", 				CPP_DEFINE		,LAN_C},
 	{"#IFDEF", 					CPP_IFDEF		,LAN_C},

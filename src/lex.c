@@ -322,12 +322,12 @@ identEnd##lab:;\
 }
 
 #define HandleCppToken(ch,ccc,cfin,cb,dd, cfile, cline, clb, clo) {\
-	char *ddd,tt[10];\
+	char *ddd,tt[20];\
 	int i,lcoll,scol;\
 	lcoll = COLUMN_POS(ccc,clb,clo);\
 	GetChar(ch,ccc,cfin,cb, clb, clo);\
 	DeleteBlank(ch,ccc,cfin,cb, clb, clo);\
-	for(i=0; i<9 && (isalpha(ch) || isdigit(ch) || ch=='_') ; i++) {\
+	for(i=0; i<19 && (isalpha(ch) || isdigit(ch) || ch=='_') ; i++) {\
 		tt[i] = ch;\
 		GetChar(ch,ccc,cfin,cb, clb, clo);\
 	}\
@@ -346,9 +346,10 @@ identEnd##lab:;\
 		PutLexToken(CPP_ELSE,dd); PutLexPosition(cfile,cline,lcoll,dd);\
 	} else if (! strcmp(tt,"endif")) {\
 		PutLexToken(CPP_ENDIF,dd); PutLexPosition(cfile,cline,lcoll,dd);\
-	} else if (! strcmp(tt,"include")) { \
+	} else if (! strcmp(tt,"include") || ! strcmp(tt,"include_next")) { \
 		char endCh;\
-		PutLexToken(CPP_INCLUDE,dd); \
+		if (! strcmp(tt,"include"))	PutLexToken(CPP_INCLUDE,dd)\
+		else PutLexToken(CPP_INCLUDENEXT,dd);\
 		PutLexPosition(cfile,cline,lcoll,dd);\
 		DeleteBlank(ch,ccc,cfin,cb, clb, clo);\
 		if (ch == '\"' || ch == '<') {\

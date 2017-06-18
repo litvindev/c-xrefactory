@@ -473,7 +473,7 @@ void popInclude() {
 	}
 }
 
-static FILE *openInclude(char pchar, char *name, char **fileName) {
+FILE *openInclude(char pchar, char *name, int nextFlag) {
 	S_editorBuffer 	*er;
 	FILE			*r;
 	S_stringList 	*ll;
@@ -505,10 +505,13 @@ static FILE *openInclude(char pchar, char *name, char **fileName) {
 			strcpy(nn+dlen, name);
 			nnlen = dlen+nmlen;
 			nn[nnlen]=0;
+			nnn = normalizeFileName(nn, s_cwd);
+			if (! nextFlag || strcmp(nnn, cFile.fileName) != 0) {
 //&fprintf(dumpOut, "try to open <%s>\n",nn);
-			er = editorFindFile(nn);
-			if (er==NULL) r = fopen(nn,"r");
-			if (er!=NULL || r!=NULL) goto found;
+				er = editorFindFile(nn);
+				if (er==NULL) r = fopen(nn,"r");
+				if (er!=NULL || r!=NULL) goto found;
+			}
 		});
 	}
 	if (er==NULL && r==NULL) return(NULL);
@@ -521,8 +524,7 @@ static FILE *openInclude(char pchar, char *name, char **fileName) {
 	return(stdin);  // NOT NULL
 }
 
-static void processInclude2(S_position *ipos, char pchar, char *iname) {
-	char *fname;
+static void processInclude2(S_position *ipos, char pchar, char *iname, int nextFlag) {
 	FILE *nyyin;
 	S_symbol ss,*memb;
 	int ii;
@@ -530,7 +532,7 @@ static void processInclude2(S_position *ipos, char pchar, char *iname) {
 	FILL_symbolBits(&ss.b,0,0,0,0,0,TypeMacro,StorageNone,0);
 	FILL_symbol(&ss,tmpBuff,tmpBuff,s_noPos,ss.b,mbody,NULL,NULL);
 	if (symTabIsMember(s_symTab, &ss, &ii, &memb)) return;
-	nyyin = openInclude(pchar, iname, &fname);
+	nyyin = openInclude(pchar, iname, nextFlag);
 	if (nyyin == NULL) {
 		assert(s_opt.taskRegime);
 		if (s_opt.taskRegime!=RegimeEditServer) warning(ERR_CANT_OPEN, iname);
@@ -540,7 +542,7 @@ static void processInclude2(S_position *ipos, char pchar, char *iname) {
 }
 
 
-static void processInclude(S_position *ipos) {
+static void processInclude(S_position *ipos, int nextFlag) {
 	FILE *nyyin;
 	char *fname;
 	char *ccc, *cc2;
@@ -556,14 +558,14 @@ assert(0);
 			cInput = macStack[0];
 			macStacki = 0;
 		}
-		processInclude2(ipos, *ccc, ccc+1);
+		processInclude2(ipos, *ccc, ccc+1, nextFlag);
 	} else {
 		cInput.cc = cc2;		/* unget lexem */
 		lex = yylex();
 		if (lex == STRING_LITERAL) {
 			cInput = macStack[0];		// hack, cut everything pending
 			macStacki = 0;
-			processInclude2(ipos, '\"', yytext);
+			processInclude2(ipos, '\"', yytext, nextFlag);
 		} else if (lex == '<') {
 			// TODO!!!!
 			warning(ERR_ST,"Include <> after macro expansion not yet implemented, sorry\n\tuse \"\" instead");
@@ -1098,7 +1100,10 @@ static int processCppConstruct(int lex) {
 /*	if (s_opt.debug) fprintf(dumpOut,"%s ",s_tokenName[lex]); */
 	switch (lex) {
 	case CPP_INCLUDE:
-		processInclude(&pos);
+		processInclude(&pos, 0);
+		break;
+	case CPP_INCLUDENEXT:
+		processInclude(&pos, 1);
 		break;
 	case CPP_DEFINE0:
 		AddHtmlCppReference(pos);

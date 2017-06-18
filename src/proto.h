@@ -2569,6 +2569,7 @@ void addIncludeReference C_ARG((int filenum, S_position *pos));
 void addThisFileDefineIncludeReference C_ARG((int filenum));
 void pushNewInclude C_ARG((FILE *f, S_editorBuffer *buff, char *name, char *prepend));
 void popInclude C_ARG(());
+FILE *openInclude(char pchar, char *name, int nextFlag);
 void copyDir C_ARG((char *dest, char *s, int *i));
 char *normalizeFileName C_ARG((char *name, char *relativeto));
 int addFileTabItem C_ARG((char *name, int *fileNumber));
