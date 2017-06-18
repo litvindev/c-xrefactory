@@ -1141,8 +1141,10 @@ type_specifier_list
 	;
 */
 
-type_specifier_list
-	: type_mod_specifier_list						/* { $$.d = $1.d; } */
+type_specifier_list:				{ /* gcc extension allow empty field */
+		$$.d = crEmptyField();
+	}
+	| type_mod_specifier_list						/* { $$.d = $1.d; } */
 	| type_specifier_list0							/* { $$.d = $1.d; } */
 	;
 
