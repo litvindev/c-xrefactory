@@ -1327,6 +1327,10 @@ static void collate(char **albcc, char **abcc, char *buf, int *absize,
 		GetLexToken(lex, ncc);
 		PassLex(ncc, lex, line, val, hash, pos, len, 0);
 		cc = actArgs[val].a; ccfin = actArgs[val].fin;
+		if (! (cc < ccfin) && NextLexToken(lbcc) == ',') {
+			bcc = lbcc;
+			lbcc = NULL;
+		}
 	} else {
 		cc = ncc; 
 		GetLexToken(lex, ncc);
