@@ -40,9 +40,8 @@ static char *s_standardCOptions[] = {
 #endif													/*SBD*/
 #ifdef __mygnulinux__	/*SBD*/
 	"-D__attribute__(xxx) ",
+	"-D__extension__ ",
 	"-D__alignof__(xxx) 8",
-	"-Dtypeof(xxx) int",
-	"-D__typeof__(xxx) int",
 	"-D__gnuc_va_list void",
 	"-D__builtin_va_list void",
 	"-D__builtin_va_start(v, l) ",
@@ -138,9 +137,8 @@ static char *s_standardCccOptions[] = {
 	"-I", "/usr/include/",
 #ifdef __mygnulinux__	/*SBD*/
 	"-D__attribute__(xxx) ",
+	"-D__extension__ ",
 	"-D__alignof__(xxx) 8",
-	"-Dtypeof(xxx) int",
-	"-D__typeof__(xxx) int",
 	"-D__gnuc_va_list void",
 	"-D__builtin_va_list void",
 	"-D__builtin_va_start(v, l) ",

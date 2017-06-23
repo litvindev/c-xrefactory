@@ -35,7 +35,6 @@
 #include "head.h"
 #include "proto.h"      /*SBD*/
 
-
 #define YYDEBUG 0
 #define yyerror styyerror
 #define yyErrorRecovery styyErrorRecovery
@@ -106,7 +105,7 @@
 
 /* c-special */
 %token TYPEDEF EXTERN AUTO REGISTER SIGNED UNSIGNED STRUCT UNION ENUM
-%token SIZEOF RESTRICT _ATOMIC _BOOL _THREADLOCAL _NORETURN
+%token SIZEOF TYPEOF RESTRICT _ATOMIC _BOOL _THREADLOCAL _NORETURN
 /* hmm */
 %token ANONYME_MOD
 
@@ -190,7 +189,6 @@
 /* commons */
 %token IDENTIFIER CONSTANT LONG_CONSTANT
 %token FLOAT_CONSTANT DOUBLE_CONSTANT
-
 %token STRING_LITERAL 
 %token LINE_TOK
 %token IDENT_TO_COMPLETE		/* identifier under cursor */
@@ -206,8 +204,6 @@
 /* ****************************************************************** */
 
 %token LAST_TOKEN
-
-
 
 /* *************************************************************** */
 
@@ -280,7 +276,7 @@
 %type <bbsymbolPositionLstPair> parameter_identifier_list identifier_list
 %type <bbpositionLst> argument_expr_list argument_expr_list_opt
 
-%type <bbtypeModif> type_specifier2 
+%type <bbtypeModif> type_specifier2 typeof_specifier
 %type <bbtypeModif> struct_or_union_specifier struct_or_union_define_specifier
 %type <bbtypeModif> enum_specifier enum_define_specifier
 %type <bbtypeModif> type_name abstract_declarator abstract_declarator2
@@ -751,6 +747,9 @@ declaration_specifiers0
 	| type_specifier2										{
 		$$.d  = typeSpecifier2($1.d);
 	}
+	| typeof_specifier										{
+		$$.d = typeSpecifier2($1.d);
+	}
 	| declaration_modality_specifiers  user_defined_type	{ 
 		assert($2.d);
 		assert($2.d->sd);
@@ -765,9 +764,9 @@ declaration_specifiers0
 		$$.d = $1.d;
 		declTypeSpecifier2($1.d,$2.d);
 	}
-	| declaration_specifiers0 type_modality_specifier		{
+	| declaration_modality_specifiers typeof_specifier		{
 		$$.d = $1.d;
-		declTypeSpecifier1($1.d,$2.d);
+		declTypeSpecifier2($1.d,$2.d);
 	}
 	| declaration_specifiers0 type_specifier1				{
 		$$.d = $1.d;
@@ -780,6 +779,10 @@ declaration_specifiers0
 	| declaration_specifiers0 storage_class_specifier		{
 		$$.d = $1.d;
 		$$.d->b.storage = $2.d; 
+	}
+	| declaration_specifiers0 type_modality_specifier		{
+		$$.d = $1.d;
+		declTypeSpecifier1($1.d,$2.d);
 	}
 	| declaration_specifiers0 function_specifier			{
 		$$.d = $1.d;
@@ -897,6 +900,15 @@ type_specifier1
 type_specifier2
 	: struct_or_union_specifier		/* { $$.d = $1.d; } */
 	| enum_specifier				/* { $$.d = $1.d; } */
+	;
+
+typeof_specifier
+	: TYPEOF '(' type_name ')'								{
+		$$.d  = $3.d;
+	}
+	| TYPEOF '(' expr ')'									{
+		$$.d = $3.d.t;
+	}
 	;
 
 function_specifier
@@ -1174,6 +1186,9 @@ type_specifier_list0
 	| type_specifier2										{
 		$$.d  = typeSpecifier2($1.d);
 	}
+	| typeof_specifier										{
+		$$.d  = typeSpecifier2($1.d);
+	}
 	| type_mod_specifier_list user_defined_type				{ 
 		assert($2.d);
 		assert($2.d->sd);
@@ -1186,6 +1201,10 @@ type_specifier_list0
 		declTypeSpecifier1($1.d,$2.d);
 	}
 	| type_mod_specifier_list type_specifier2		{
+		$$.d = $1.d;
+		declTypeSpecifier2($1.d,$2.d);
+	}
+	| type_mod_specifier_list typeof_specifier		{
 		$$.d = $1.d;
 		declTypeSpecifier2($1.d,$2.d);
 	}
@@ -1919,6 +1938,3 @@ void makeCCompletions(char *s, int len, S_position *pos) {
 
 	LICENSE_CHECK();
 }
-
-
-
