@@ -481,12 +481,12 @@ FILE *openInclude(char pchar, char *name, int nextFlag) {
 	char 			nn[MAX_FILE_NAME_SIZE];
 	char 			rdir[MAX_FILE_NAME_SIZE];
 	char 			*nnn;
-	int 			nnlen,dlen,fdlen,nmlen,len,ii;
+	int 			nnlen,dlen,fdlen,nmlen,i;
 	er = NULL; r = NULL;
 	nmlen = strlen(name);
 	copyDir(rdir, cFile.fileName, &fdlen);
 	if (pchar!='<') {
-/*fprintf(dumpOut, "dlen == %d\n",dlen);*/
+/*&fprintf(dumpOut, "dlen == %d\n",dlen);&*/
 		strcpy(nn,normalizeFileName(name, rdir));
 /*&fprintf(dumpOut, "try to open %s\n",nn);&*/
 		er = editorFindFile(nn);
@@ -518,6 +518,19 @@ FILE *openInclude(char pchar, char *name, int nextFlag) {
  found:
 	nnn = normalizeFileName(nn, s_cwd);
 	strcpy(nn,nnn);
+	if (	(s_opt.taskRegime==RegimeXref
+			 || s_opt.taskRegime==RegimeHtmlGenerate)
+			&& s_opt.showIncludes) {
+		sprintf(tmpBuff, "  ");
+		for(i=0; i<inStacki; i++) sprintf(tmpBuff+strlen(tmpBuff), "  ");
+		sprintf(tmpBuff+strlen(tmpBuff),"%s", nn);
+		if (s_opt.xref2) {
+			ppcGenRecord(PPC_INFORMATION, tmpBuff, "\n");
+		} else {
+			fprintf(dumpOut,"'%s'\n", tmpBuff);
+		}
+		fflush(dumpOut);
+	}
 //&fprintf(dumpOut, "file %s opened\n",nn);
 //&fprintf(dumpOut, "checking to  %s \n",s_fileTab.tab[s_olOriginalFileNumber]->name);
 	pushNewInclude(r, er, nn, "\n");

@@ -1740,6 +1740,7 @@ struct options {
 	int taskRegime;
 	char *user;
 	int debug;
+	int showIncludes;
 	int cpp_comment;
 	int c_struct_scope;
 	int cxrefs;

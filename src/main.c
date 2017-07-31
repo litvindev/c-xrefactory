@@ -91,6 +91,7 @@ static void usage(char *s) {
 #	ifdef DEBUG
 	fprintf(stdout,"\t-debug                - produce debug trace of the execution\n");
 #	endif
+	fprintf(stdout,"\t-showincludes         - produce trace of include files\n");
 #if 0
 	fprintf(stdout,"\t-typedefs        - generate structure/enums typedefs\n");
 	fprintf(stdout,"\t-str_fill        - generate structure fills\n");
@@ -1386,6 +1387,7 @@ static int processSOption(int *ii, int argc, char **argv) {
 	int i = * ii;
 	char *name, *val;
 	if (0) {}
+	else if (strcmp(argv[i],"-showincludes")==0) s_opt.showIncludes = 1;
 	else if (strcmp(argv[i],"-strict")==0)		s_opt.strictAnsi = 1;
 	else if (strcmp(argv[i],"-str_fill")==0) 	s_opt.str_fill = 1;
 	else if (strcmp(argv[i],"-str_copy")==0) 	s_opt.str_copy = 1;
