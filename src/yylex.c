@@ -1034,7 +1034,7 @@ int cexpyylex() {
 		if (mm && memb->u.mbody == NULL) mm = 0;   // undefined macro
 		assert(s_opt.taskRegime);
 		if (CX_REGIME()) {
-			if (mm) addCxReference(&dd, &pos, UsageUsed,s_noneFileIndex, s_noneFileIndex);
+			if (mm) addCxReference(memb, &pos, UsageUsed,s_noneFileIndex, s_noneFileIndex);
 		}
 		/* following call sets uniyylval */
 		res = cexpTranslateToken(CONSTANT, mm);
