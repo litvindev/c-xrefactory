@@ -1622,6 +1622,7 @@ struct options {
 	int commentMovingLevel;
 	S_stringList *pruneNames;
 	S_stringList *inputFiles;
+	S_stringList *includeFiles;
 	int continueRefactoring;
 	int completionCaseSensitive;
 	char *xrefrc;

@@ -54,6 +54,7 @@ static void usage(char *s) {
 	fprintf(stdout,"\t-javadocavailable=<packs> - packages for which javadoc is available\n");
 	fprintf(stdout,"\t-p <prj>              - read options from <prj> section\n");
 	fprintf(stdout,"\t-I <dir>              - search for includes in <dir>\n");
+	fprintf(stdout,"\t-include <file>       - process <file> as input before processing the regular C input file\n");
 	fprintf(stdout,"\t-D<mac>[=<body>]      - define macro <mac> with body <body>\n");
 	fprintf(stdout,"\t-packages             - allow packages as input files\n");
 	fprintf(stdout,"\t-sourcepath <path>    - set java sources paths\n");
@@ -757,8 +758,14 @@ static int processIOption(int *ii, int argc, char **argv) {
 		mainAddStringListOption(&s_opt.includeDirs, argv[i]+2);
 	}
 	else if (strcmp(argv[i],"-include")==0) {
-		warning(ERR_ST,"-include option is depreciated, use -optinclude instead");
-		i = mainHandleIncludeOption(argc, argv, i);
+		/* process file as if #include "file" */
+	    i++;
+		if (i >= argc) {
+			sprintf(tmpBuff,"file name expected after -include\n");
+			error(ERR_ST,tmpBuff);
+			usage(argv[0]);
+		}
+		mainAddStringListOption(&s_opt.includeFiles, argv[i]);
 	}
 	else return(0);
 	*ii = i;
@@ -2029,6 +2036,12 @@ static void fileTabInit() {
 
 /*///////////////////////// parsing /////////////////////////////////// */
 static void mainParseInputFile() {
+	S_stringList	*ll;
+	if (s_language == LAN_C || s_language == LAN_CCC) {
+		for (ll=s_opt.includeFiles; ll!=NULL; ll=ll->next) {
+		  openInclude('<', ll->d, 0);
+		}
+	}
 	if (s_language == LAN_JAVA) {
 		uniyylval = & s_yygstate->gyylval;
 		javayyparse();
@@ -2321,7 +2334,7 @@ static void mainFileProcessingInitialisations(
 	struct stat 	dffstat;
 	char 			*fileName;
 	int				lc;
-	S_stringList	*tmpIncludeDirs;
+	S_stringList	*tmpIncludeDirs,*tmpIncludeFiles;
 
 	fileName = s_input_file_name;
 	mainSetLanguage(fileName,  outLanguage);
@@ -2379,10 +2392,13 @@ static void mainFileProcessingInitialisations(
 		reInitCwd(dffname, dffsect);
 		tmpIncludeDirs = s_opt.includeDirs;
 		s_opt.includeDirs = NULL;
+		tmpIncludeFiles = s_opt.includeFiles;
+		s_opt.includeFiles = NULL;
 		getAndProcessXrefrcOptions(dffname, dffsect, dffsect);
 		getAndProcessGccIncludeOptions();
 		getAndProcessGccDefineOptions();
 		LIST_APPEND(S_stringList, s_opt.includeDirs, tmpIncludeDirs);
+		LIST_APPEND(S_stringList, s_opt.includeFiles, tmpIncludeFiles);
 		if (s_opt.taskRegime != RegimeEditServer && s_input_file_name == NULL) {
 			*outInputIn = 0;
 			goto fini;
@@ -2516,6 +2532,7 @@ static void mainTotalTaskEntryInitialisations(int argc, char **argv) {
 	DPRINTF("Initialisations.\n");
 	memset(&s_count, 0, sizeof(S_counters));
 	s_opt.includeDirs = NULL;
+	s_opt.includeFiles = NULL;
 	SM_INIT(ftMemory);
 	FT_ALLOCC(s_fileTab.tab, MAX_FILES, struct fileItem *);\
 	FILL_EXP_COMMAND();\

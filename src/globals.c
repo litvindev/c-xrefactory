@@ -312,6 +312,7 @@ S_options s_initOpt = {
 	0,					// comment moving level
 	NULL,				// prune name
 	NULL,				// input files
+	NULL,				// include files
 	RC_ZERO,			// continue refactoring
 	0,					// completion case sensitive
 	NULL,				// xrefrc
