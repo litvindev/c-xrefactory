@@ -37,6 +37,7 @@ enum miscellaneous {						/* misc. constants */
 	CX_HTML_SECOND_PASS,
 	CX_MENU_CREATION,
 	CX_BY_PASS,
+	CX_BY_PASS2,
 	HTML_GEN,
 	HTML_NO_GEN,
 	MEM_ALLOC_ON_SM,
@@ -2121,6 +2122,7 @@ S_reference *duplicateReference C_ARG((S_reference *r));
 S_reference * addCxReferenceNew C_ARG((S_symbol *p, S_position *pos, S_usageBits *ub, int vFunCl, int vApplCl));
 S_reference * addCxReference C_ARG((S_symbol *p, S_position *pos, int usage, int vFunClass,int vApplClass));
 S_reference *addSpecialFieldReference C_ARG((char *name, int storage, int fnum, S_position *p, int usage));
+void checkPreviousCxLinkNames(S_symbol *p, S_position *pos);
 void addClassTreeHierarchyReference C_ARG((int fnum, S_position *p, int usage));
 void addCfClassTreeHierarchyRef C_ARG((int fnum, int usage));
 void addTrivialCxReference  C_ARG((char *name, int symType, int storage, S_position *pos, int usage));
@@ -2156,6 +2158,7 @@ int isInRefList C_ARG((S_reference *list,
 				));
 char *getXrefEnvironmentValue C_ARG(( char *name ));
 int byPassAcceptableSymbol C_ARG((S_symbolRefItem *p));
+int byPassAcceptableSymbol2 C_ARG((S_symbolRefItem *p));
 int itIsSymbolToPushOlRefences C_ARG((S_symbolRefItem *p, S_olcxReferences *rstack, S_olSymbolsMenu **rss, int checkSelFlag));
 void olcxAddReferenceToOlSymbolsMenu C_ARG((S_olSymbolsMenu  *cms, S_reference *rr, 
 						  int bestFitTlag));
@@ -2225,6 +2228,7 @@ void scanReferenceFiles C_ARG((char *fname, S_cxScanFileFunctionLink *scanFunTab
 extern S_cxScanFileFunctionLink s_cxScanFileTab[];
 extern S_cxScanFileFunctionLink s_cxFullScanFunTab[];
 extern S_cxScanFileFunctionLink s_cxByPassFunTab[];
+extern S_cxScanFileFunctionLink s_cxByPassFunTab2[];
 extern S_cxScanFileFunctionLink s_cxSymbolMenuCreationTab[];
 extern S_cxScanFileFunctionLink s_cxSymbolLoadMenuRefs[];
 extern S_cxScanFileFunctionLink s_cxScanFunTabFor2PassMacroUsage[];

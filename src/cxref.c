@@ -849,6 +849,44 @@ S_reference * addCxReference(S_symbol *p, S_position *pos, int usage, int vFunCl
 	return(addCxReferenceNew(p, pos, &ub, vFunCl, vApplCl));
 }
 
+void checkPreviousCxLinkNames(S_symbol *p, S_position *pos)
+{
+	int				ii,category,scope,storage,deleted;
+	char			*ss;
+	S_symbolRefItem	*memb,*memb2,ri,ri2;
+	S_reference		*rr,**rrplace;
+	S_olSymbolsMenu *mm,**mmplace,ddd;
+	getSymbolCxrefCategories(p, &category, &scope, &storage);
+	FILL_symbolRefItemBits(&ri.b,p->b.symType,storage,scope,
+						   p->b.accessFlags,category,0);
+	FILL_symbolRefItem(&ri,p->linkName,
+					   0,				   // cxFileHashNumber(p->linkName),
+					   s_noneFileIndex,s_noneFileIndex,ri.b,NULL,NULL);
+	p->pos = *pos;
+	setGlobalFileDepNames(p->name, p, MEM_XX);
+	if (refTabIsMember(&s_cxrefTab, &ri, &ii, &memb)) {
+		deleted = refTabDeleteExact(&s_cxrefTab, memb);
+		assert(deleted);
+		ri2 = ri; ri2.name = p->linkName;
+		if (!refTabIsMember(&s_cxrefTab, &ri2, &ii, &memb2)) {
+			CX_ALLOCC(ss, strlen(p->linkName)+1, char);
+			strcpy(ss, p->linkName);
+			memb2 = memb;
+			memb2->name = ss;
+			refTabSet(&s_cxrefTab, memb2, ii);
+		}
+		else {
+			while (memb->refs != NULL) {
+				rr = memb->refs; memb->refs = memb->refs->next;
+				SORTED_LIST_PLACE2(rrplace, S_reference, *rr, &memb2->refs);
+				if (*rrplace == NULL || SORTED_LIST_NEQ((*rrplace), *rr)) {
+					LIST_CONS(rr,(*rrplace));
+				}
+			}
+		}
+	}
+}
+
 void addTrivialCxReference(char *name,int symType,int storage,S_position *pos,int usage) {
 	S_symbol 		ss;
 	S_symbolBits	bb;
@@ -3634,6 +3672,7 @@ void olCreateSelectionMenu(int command) {
 	LIST_SORT(S_olSymbolsMenu, rstack->hkSelectedSym, olMenuHashFileNumLess);
 	ss = rstack->hkSelectedSym;
 	while (ss!=NULL) {
+		readOneAppropReferenceFile(ss->s.name, s_cxByPassFunTab2);
 		readOneAppropReferenceFile(ss->s.name, s_cxSymbolMenuCreationTab);
 		fnum = cxFileHashNumber(ss->s.name);
 //&fprintf(dumpOut,"file %d readed\n", fnum);
@@ -5172,6 +5211,16 @@ int byPassAcceptableSymbol(S_symbolRefItem *p) {
 	char *nn, *nnn;
 	GET_NUDE_NAME(p->name, nn, len);
 	GET_NUDE_NAME(s_opt.browsedSymName, nnn, nlen);
+	if (len != nlen) return(0);
+	if (strncmp(nn, nnn, len)) return(0);
+	return(1);
+}
+
+int byPassAcceptableSymbol2(S_symbolRefItem *p) {
+	int nlen,len;
+	char *nn, *nnn;
+	GET_NUDE_NAME(p->name, nn, len);
+	GET_NUDE_NAME(s_olcxCurrentUser->browserStack.top->hkSelectedSym->s.name, nnn, nlen);
 	if (len != nlen) return(0);
 	if (strncmp(nn, nnn, len)) return(0);
 	return(1);

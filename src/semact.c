@@ -924,6 +924,8 @@ S_typeModifiers *simpleStrUnionSpecifier(	S_idIdent *typeName,
 		pp->u.s->stype.u.t = pp;
 		setGlobalFileDepNames(id->name, pp, MEM_XX);
 		addSymbol(pp, s_symTab);
+	} else if (IS_DEFINITION_USAGE(usage)) {
+		checkPreviousCxLinkNames(pp, &id->p);
 	}
 	addCxReference(pp, &id->p, usage,s_noneFileIndex, s_noneFileIndex);
 	return(&pp->u.s->stype);
@@ -1078,6 +1080,8 @@ S_typeModifiers *simpleEnumSpecifier(S_idIdent *id, int usage) {
 		*pp = p;
 		setGlobalFileDepNames(id->name, pp, MEM_XX);
 		addSymbol(pp, s_symTab);
+	} else if (IS_DEFINITION_USAGE(usage)) {
+		checkPreviousCxLinkNames(pp, &id->p);
 	}
 	addCxReference(pp, &id->p, usage,s_noneFileIndex, s_noneFileIndex);
 	return(crSimpleEnumType(pp,TypeEnum));

@@ -1189,7 +1189,8 @@ static void cxrfSymbolName(		int size,
 			}
 			s_inLastInfos.onLineRefMenuItem = cms;
 //&fprintf(dumpOut,"check (%s) %s ols==%d\n", miscellaneousName[additionalArg], ddd->name, ols);
-			if (ols || (additionalArg==CX_BY_PASS&&byPassAcceptableSymbol(ddd))
+			if (ols || (additionalArg==CX_BY_PASS&&byPassAcceptableSymbol(ddd)
+				|| (additionalArg==CX_BY_PASS2&&byPassAcceptableSymbol2(ddd)))
 				) {
 				s_inLastInfos.onLineReferencedSym = si;
 				s_inLastInfos.onLineRefIsBestMatchFlag = (ols == 2);
@@ -1250,7 +1251,8 @@ static void cxrfReference(		int size,
 	S_symbolRefItem 	*memb;
 	S_usageBits			usageBits;
 	int 				ii,file,line,coll,usage,sym,addfl,reqAcc;
-	int 				copyrefFl;
+	int 				copyrefFl,nlen;
+	char 				*nn;
 	assert(ri == CXFI_REFERENCE);
 	usage = s_inLastInfos.counter[CXFI_USAGE];
 	reqAcc = s_inLastInfos.counter[CXFI_REQ_ACCESS];
@@ -1351,6 +1353,13 @@ static void cxrfReference(		int size,
 							olAddBrowsedSymbol(s_inLastInfos.symbolTab[sym],
 											   &s_olcxCurrentUser->browserStack.top->hkSelectedSym,
 											   1, 1, 0, usage,0,&s_noPos, UsageNone);
+						}
+					} else if (additionalArg == CX_BY_PASS2) {
+						if (POSITION_EQ(s_cxRefPos, pos)) {
+							nlen = strlen(s_inLastInfos.symbolTab[sym]->name);
+							OLCX_ALLOCC(nn, nlen+1, char);
+							strcpy(nn, s_inLastInfos.symbolTab[sym]->name);
+							s_olcxCurrentUser->browserStack.top->hkSelectedSym->s.name = nn;
 						}
 					} else if (1 
 							   /*& 
@@ -1617,6 +1626,18 @@ S_cxScanFileFunctionLink s_cxByPassFunTab[]={
 	{CXFI_SOURCE_INDEX, cxrfSourceIndex, CX_JUST_READ},
 	{CXFI_SYM_NAME,cxrfSymbolName, CX_BY_PASS},
 	{CXFI_REFERENCE,cxrfReference, CX_BY_PASS},
+	{CXFI_CLASS_EXT,cxrfSubClass, CX_JUST_READ},
+	{CXFI_REFNUM,cxrfRefNum, 0},
+	{-1,NULL, 0},
+};
+
+S_cxScanFileFunctionLink s_cxByPassFunTab2[]={
+	{CXFI_SINGLE_RECORDS,cxrfSetSingleRecords, 0},
+	{CXFI_VERSION, cxrfVersionCheck, 0},
+	{CXFI_FILE_NAME,cxrfFileName, CX_JUST_READ},
+	{CXFI_SOURCE_INDEX, cxrfSourceIndex, CX_JUST_READ},
+	{CXFI_SYM_NAME,cxrfSymbolName, CX_BY_PASS2},
+	{CXFI_REFERENCE,cxrfReference, CX_BY_PASS2},
 	{CXFI_CLASS_EXT,cxrfSubClass, CX_JUST_READ},
 	{CXFI_REFNUM,cxrfRefNum, 0},
 	{-1,NULL, 0},
