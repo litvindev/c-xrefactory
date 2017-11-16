@@ -255,7 +255,7 @@
 %type <bbidIdent> str_rec_identifier STRUCT UNION struct_or_union
 %type <bbidIdent> user_defined_type TYPE_NAME
 %type <bbidIdent> designator designator_list
-%type <bbidlist> designation_opt initializer initializer_list initializer_list_opt eq_initializer_opt
+%type <bbidlist> initializer initializer0 initializer_list initializer_list_opt eq_initializer_opt
 %type <bbinteger> assignment_operator
 %type <bbinteger> pointer CONSTANT _ncounter_ _nlabel_ _ngoto_ _nfork_
 %type <bbunsign> storage_class_specifier type_specifier1
@@ -1412,24 +1412,28 @@ initializer_list_opt:		{
 	;
 
 initializer_list
-	: Sv_tmp designation_opt initializer	{
+	: Sv_tmp initializer0							{
 		$$.d = $2.d;
-		if ($$.d!=NULL)	$$.d->down = $3.d;
 		tmpWorkMemoryi = $1.d;
 	}
-	| initializer_list ',' Sv_tmp designation_opt initializer	{
-		LIST_APPEND(S_idIdentList, $1.d, $4.d);
-		if ($4.d!=NULL) $4.d->down = $5.d;
+	| initializer_list ',' Sv_tmp initializer0		{
+		$$.d = $1.d;
+		LIST_APPEND(S_idIdentList, $$.d, $4.d);
 		tmpWorkMemoryi = $3.d;
 	}
 	;
 
-designation_opt:				{
-		$$.d = NULL;
+initializer0
+	: initializer								{
+		$$.d = $1.d;
 	}
-	| designator_list '='		{
+	| designator_list '=' initializer			{
 		$$.d = StackMemAlloc(S_idIdentList);
-		FILL_idIdentList($$.d, *$1.d, $1.d->name, TypeDefault, NULL,NULL);
+		FILL_idIdentList($$.d, *$1.d, $1.d->name, TypeDefault, $3.d,NULL);
+	}
+	| str_rec_identifier ':' initializer		{ /* GNU-extension*/
+		$$.d = StackMemAlloc(S_idIdentList);
+		FILL_idIdentList($$.d, *$1.d, $1.d->name, TypeDefault, $3.d,NULL);
 	}
 	;
 
@@ -1438,7 +1442,8 @@ designator_list
 		$$.d = $1.d;
 	}
 	| designator_list designator	{
-		LIST_APPEND(S_idIdent, $1.d, $2.d);
+		$$.d = $1.d;
+		LIST_APPEND(S_idIdent, $$.d, $2.d);
 	}
 	;
 
