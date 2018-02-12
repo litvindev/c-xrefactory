@@ -560,8 +560,9 @@ static void processSectionMarker(char *ttt,int i,char *project,char *section,
 int readOptionFromFile(FILE *ff, int *nargc, char ***nargv, int memFl, 
 						char *sectionFile,char *project, char *resSection) {
 	char tt[MAX_OPTION_LEN];
-	int len,argc,i,c,isActiveSect,isActivePass,res,sl,passn=0;
-	char **aargv,*argv[MAX_STD_ARGS];
+	int len,argc,dfargc,i,c,isActiveSect,isActivePass,res,sl,passn=0;
+	char **aargv,**dfargv,*argv[MAX_STD_ARGS],dffsect[MAX_FILE_NAME_SIZE];
+	FILE *ff2;
 	argc = 1; res = 0; isActiveSect = isActivePass = 1; aargv=NULL;
 	resSection[0]=0;
 	if (memFl==MEM_ALLOC_ON_SM) SM_INIT(optMemory);
@@ -573,7 +574,22 @@ int readOptionFromFile(FILE *ff, int *nargc, char ***nargv, int memFl,
 			expandEnvironmentVariables(tt+1,MAX_OPTION_LEN,&len,GLOBAL_ENV_ONLY);
 			//&fprintf(dumpOut,"expanded '%s'\n", tt);
 			processSectionMarker(tt,len+1,project,sectionFile,&isActiveSect,resSection);
-		} else if (isActiveSect && strncmp(tt,"-pass",5)==0) {
+		} else if (isActiveSect && (strncmp(tt,"-optinclude",11)==0 || strncmp(tt, "-stdop",6)==0)) {
+			c = getOptionFromFile(ff,tt,MAX_OPTION_LEN,&len);
+			expandEnvironmentVariables(tt,MAX_OPTION_LEN,&len,DEFAULT_VALUE);
+			ff2 = fopen(tt, "r");
+			if (ff2==NULL) fatalError(ERR_CANT_OPEN,tt, XREF_EXIT_ERR);
+			if (readOptionFromFile(ff2,&dfargc,&dfargv,memFl,sectionFile,project,dffsect)) {
+			  res = 1;
+			}
+			fclose(ff2);
+			for(i=1; i<dfargc; i++) {
+				argv[argc] = dfargv[i];
+				if (argc < MAX_STD_ARGS-1) argc++;
+			}
+			if (dffsect[0]!=0) strcpy(resSection,dffsect);
+		}
+		else if (isActiveSect && strncmp(tt,"-pass",5)==0) {
 			sscanf(tt+5, "%d", &passn);
 			if (passn==s_currCppPass || s_currCppPass==ANY_CPP_PASS) {
 				isActivePass = 1;
@@ -584,7 +600,7 @@ int readOptionFromFile(FILE *ff, int *nargc, char ***nargv, int memFl,
 		} else if (strncmp(tt,"-license=",9)==0) {
 			// special care is given to the -license option
 			strcpy(s_opt.licenseString, tt+9);
-//&			strcpy(s_initOpt.licenseString, tt+9);  // why not ?
+//&			strcpy(s_initOpt.licenseString, tt+9);	// why not ?
 			s_expTime = 0;			// reinitialize it to be reloaded
 		} else if (strcmp(tt,"-set")==0 && ACTIVE_OPTION() 
 				   && memFl!=MEM_NO_ALLOC) {	

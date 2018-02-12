@@ -356,7 +356,6 @@ void xrefSetenv(char *name, char *val) {
 	if (j==n) sge->num ++;
 }
 
-
 int mainHandleSetOption( int argc, char **argv, int i ) {
 	S_setGetEnv *sge;
 	char *name, *val;
@@ -370,13 +369,19 @@ int mainHandleSetOption( int argc, char **argv, int i ) {
 	return(i);
 }
 
-static int mainHandleIncludeOption(int argc, char **argv, int i) {
+static int mainHandleIncludeOption(int argc, char **argv, int i, int infilesFlag) {
 	int nargc,aaa; 
 	char **nargv;
+	FILE *ff;
+	char realSection[MAX_FILE_NAME_SIZE];
 	NEXT_FILE_ARG();
 	s_opt.stdopFlag = 1;
-	readOptionFile(argv[i],&nargc,&nargv,"",NULL);
-	processOptions(nargc, nargv, INFILES_DISABLED);
+	ff = fopen(argv[i],"r");
+	if (ff==NULL) fatalError(ERR_CANT_OPEN,argv[i], XREF_EXIT_ERR);
+	readOptionFromFile(ff,&nargc,&nargv,MEM_ALLOC_ON_PP,s_input_file_name,s_opt.project,realSection);
+	fclose(ff);
+	processOptions(nargc, nargv, infilesFlag);
+	reInitCwd("",realSection);
 	s_opt.stdopFlag = 0;
 	return(i);
 }
@@ -887,7 +892,7 @@ static int processNOption(int *ii, int argc, char **argv) {
 	return(1);
 }
 
-static int processOOption(int *ii, int argc, char **argv) {
+static int processOOption(int *ii, int argc, char **argv, int infilesFlag) {
 	int i = * ii;
 	if (0) {}
 	else if (strncmp(argv[i],"-oocheckbits=",13)==0)	{
@@ -1177,7 +1182,7 @@ static int processOOption(int *ii, int argc, char **argv) {
 		sscanf(argv[i]+16,"%d",&s_opt.filterValue);
 	}
 	else if (strcmp(argv[i],"-optinclude")==0) {
-		i = mainHandleIncludeOption(argc, argv, i);
+		i = mainHandleIncludeOption(argc, argv, i, infilesFlag);
 	}
 	else if (strcmp(argv[i],"-o")==0) {
 		NEXT_FILE_ARG();
@@ -1383,7 +1388,7 @@ static int processROption(int *ii, int argc, char **argv, int infilesFlag) {
 	return(1);
 }
 
-static int processSOption(int *ii, int argc, char **argv) {
+static int processSOption(int *ii, int argc, char **argv, int infilesFlag) {
 	int i = * ii;
 	char *name, *val;
 	if (0) {}
@@ -1408,7 +1413,7 @@ static int processSOption(int *ii, int argc, char **argv) {
 		xrefSetenv("-sourcepath", s_opt.sourcePath);
 	}
 	else if (strcmp(argv[i],"-stdop")==0) {
-		i = mainHandleIncludeOption(argc, argv, i);
+		i = mainHandleIncludeOption(argc, argv, i, infilesFlag);
 	}
 	else if (strcmp(argv[i],"-set")==0) {
 		i = mainHandleSetOption(argc, argv, i);
@@ -1650,7 +1655,7 @@ void processOptions(int argc, char **argv, int infilesFlag) {
 				break;
 			case 'n': case 'N': processed = processNOption(&i, argc, argv);
 				break;
-			case 'o': case 'O': processed = processOOption(&i, argc, argv);
+			case 'o': case 'O': processed = processOOption(&i, argc, argv, infilesFlag);
 				break;
 			case 'p': case 'P': processed = processPOption(&i, argc, argv);
 				break;
@@ -1658,7 +1663,7 @@ void processOptions(int argc, char **argv, int infilesFlag) {
 				break;
 			case 'r': case 'R': processed = processROption(&i, argc, argv, infilesFlag);
 				break;
-			case 's': case 'S': processed = processSOption(&i, argc, argv);
+			case 's': case 'S': processed = processSOption(&i, argc, argv, infilesFlag);
 				break;
 			case 't': case 'T': processed = processTOption(&i, argc, argv);
 				break;
