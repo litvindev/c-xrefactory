@@ -608,7 +608,7 @@ postfix_expr
 	}
 	| postfix_expr {SetStrCompl1($1.d.t);} '.' str_rec_identifier		{
 		S_symbol *rec=NULL;
-		$$.d.r = findStrRecordFromType($1.d.t, $4.d, &rec, CLASS_TO_ANY);
+		$$.d.r = findStrRecordFromType($1.d.t, $4.d, &rec, SEARCH_IN_MEMBERS_NO, CLASS_TO_ANY);
 		assert(rec);
 		$$.d.t = rec->u.type;
 		assert($$.d.t);
@@ -618,7 +618,7 @@ postfix_expr
 		S_symbol *rec=NULL;
 		$$.d.r = NULL;
 		if ($1.d.t->m==TypePointer || $1.d.t->m==TypeArray) {
-			$$.d.r = findStrRecordFromType($1.d.t->next, $4.d, &rec, CLASS_TO_ANY);
+			$$.d.r = findStrRecordFromType($1.d.t->next, $4.d, &rec, SEARCH_IN_MEMBERS_NO, CLASS_TO_ANY);
 			assert(rec);
 			$$.d.t = rec->u.type;
 		} else $$.d.t = &s_errorModifier;
@@ -1639,11 +1639,11 @@ initializer0
 	}
 	| designator_list '=' initializer			{
 		$$.d = StackMemAlloc(S_idIdentList);
-		FILL_idIdentList($$.d, *$1.d, $1.d->name, TypeDefault, $3.d,NULL);
+		FILL_idIdentList($$.d, *$1.d, NULL, TypeDefault, $3.d,NULL);
 	}
 	| str_rec_identifier ':' initializer		{ /* GNU-extension*/
 		$$.d = StackMemAlloc(S_idIdentList);
-		FILL_idIdentList($$.d, *$1.d, $1.d->name, TypeDefault, $3.d,NULL);
+		FILL_idIdentList($$.d, *$1.d, NULL, TypeDefault, $3.d,NULL);
 	}
 	;
 
@@ -1660,11 +1660,11 @@ designator_list
 designator
 	: '[' constant_expr ']'							{
 		$$.d = StackMemAlloc(S_idIdent);
-		FILL_idIdent($$.d, "", NULL, s_noPos, NULL);
+		FILL_idIdent($$.d, NULL, NULL, s_noPos, NULL);
 	}
 	| '[' constant_expr ELIPSIS constant_expr ']'	{
 		$$.d = StackMemAlloc(S_idIdent);
-		FILL_idIdent($$.d, "", NULL, s_noPos, NULL);
+		FILL_idIdent($$.d, NULL, NULL, s_noPos, NULL);
 	}
 	| '.' str_rec_identifier						{
 		$$.d = StackMemAlloc(S_idIdent);

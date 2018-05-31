@@ -27,6 +27,8 @@ enum miscellaneous {						/* misc. constants */
 	ACC_CHECK_NO,
 	VISIB_CHECK_YES,
 	VISIB_CHECK_NO,
+	SEARCH_IN_MEMBERS_YES,
+	SEARCH_IN_MEMBERS_NO,
 	CUT_OVERRIDEN_YES,
 	CUT_OVERRIDEN_NO,
 	CX_FILE_ITEM_GEN,
@@ -2274,6 +2276,7 @@ int javaGetMinimalAccessibility C_ARG((S_recFindStr *rfs, S_symbol *r));
 int findStrRecordSym C_ARG((	S_recFindStr *ss,
 								char *recname,
 								S_symbol **res,
+								int searchInMembers,
 								int javaClassif,
 								int accessCheck,
 								int visibilityCheck
@@ -2307,12 +2310,14 @@ int findStrRecord C_ARG((	S_symbol		*s,
 S_reference * findStrRecordFromSymbol C_ARG((	S_symbol *str, 
 												S_idIdent *record,
 												S_symbol **res,
+												int searchInMembers,
 												int javaClassif,
 												S_idIdent *super
 						));
 S_reference * findStrRecordFromType C_ARG((	S_typeModifiers *str, 
 							S_idIdent *record,
 							S_symbol **res,
+							int searchInMembers,
 							int javaClassif
 						));
 int mergeArguments C_ARG((S_symbol *id, S_symbol *ty));

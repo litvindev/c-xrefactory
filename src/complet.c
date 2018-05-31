@@ -924,7 +924,7 @@ static void completeRecordsNames(
 		//&} else {
 		//&	visibCheck = VISIB_CHECK_NO;
 		//&}
-		rr = findStrRecordSym(&rfs, NULL, &r, classification, accCheck, visibCheck);
+		rr = findStrRecordSym(&rfs, NULL, &r, SEARCH_IN_MEMBERS_NO, classification, accCheck, visibCheck);
 		if (rr != RETURN_OK) break;
 		if (constructorOpt==StorageConstructor && rfs.currClass!=s) break;
 		/* because constructors are not inherited */
@@ -1104,7 +1104,7 @@ static char *spComplFindNextRecord(S_exprTokenType *tok) {
 	assert(s->u.s);
 	iniFind(s, &rfs);
 	for(;;) {
-		rr = findStrRecordSym(&rfs, NULL, &r, CLASS_TO_ANY, ACC_CHECK_YES, VISIB_CHECK_YES);
+		rr = findStrRecordSym(&rfs, NULL, &r, SEARCH_IN_MEMBERS_NO, CLASS_TO_ANY, ACC_CHECK_YES, VISIB_CHECK_YES);
 		if (rr != RETURN_OK) break;
 		assert(r);
 		cname = r->name;
@@ -1416,7 +1416,7 @@ void javaHintCompleteMethodParameters(S_completions *c) {
 					   vlevel,0,NULL,vFunCl);
 			processName(r->name, &compLine, 0, (void*) c);
 		}		
-		rr = findStrRecordSym(rfs, mname, &r, CLASS_TO_METHOD, accCheck, visibCheck);
+		rr = findStrRecordSym(rfs, mname, &r, SEARCH_IN_MEMBERS_NO, CLASS_TO_METHOD, accCheck, visibCheck);
 	} while (rr == RETURN_OK);
 	if (c->ai != 0) {
 		c->comPrefix[0]=0;

@@ -268,11 +268,12 @@ int javaGetMinimalAccessibility(S_recFindStr *rfs, S_symbol *r) {
 }
 
 int findStrRecordSym(	S_recFindStr	*ss,
-						char 			*recname,	 /* can be NULL */
-						S_symbol 		**res,
-						int 			javaClassif, /* classify to method/field*/
-						int				accCheck,    /* java check accessibility */
-						int 			visibilityCheck /* redundant, always equal to accCheck? */
+						char			*recname,	 /* can be NULL */
+						S_symbol		**res,
+						int				searchInMembers, /* search im member structs/unions */
+						int				javaClassif, /* classify to method/field*/
+						int				accCheck,	 /* java check accessibility */
+						int				visibilityCheck /* redundant, always equal to accCheck? */
 	) {
 	S_symbol 			*s,*r,*cclass;
 	S_symbolList 		*sss;
@@ -334,6 +335,16 @@ int findStrRecordSym(	S_recFindStr	*ss,
 				}
 				FSRS_RETURN_WITH_SUCCESS(ss, res, r);
 			}
+			if (searchInMembers == SEARCH_IN_MEMBERS_YES
+				&& r->name!=NULL && r->b.symType==TypeDefault) {
+				S_typeModifiers *type = r->u.type;
+				if (type->m == TypeArray) type = type->next;
+				if (type->m==TypeUnion || type->m==TypeStruct) {
+					if (ss->aui+1 < MAX_ANONYMOUS_FIELDS) {
+						ss->au[ss->aui++] = type->u.t;
+					}
+				}
+			}
 		nextRecord:;
 		}
 	nextClass:
@@ -366,15 +377,16 @@ int findStrRecord(	S_symbol		*s,
 					int 			javaClassif
 				) {
 	S_recFindStr rfs;
-	return(findStrRecordSym(iniFind(s,&rfs),recname,res,javaClassif,
-							ACC_CHECK_YES,VISIB_CHECK_YES));
+	return(findStrRecordSym(iniFind(s,&rfs),recname,res,SEARCH_IN_MEMBERS_NO,
+							javaClassif,ACC_CHECK_YES,VISIB_CHECK_YES));
 }
 
 /* and push reference */
 // this should be split into two copies, different for C and Java.
 S_reference *findStrRecordFromSymbol( S_symbol *sym, 
 									  S_idIdent *record, 
-									  S_symbol **res, 
+									  S_symbol **res,
+									  int searchInMembers,
 									  int javaClassif,
 									  S_idIdent *super /* covering special case when invoked
 														  as SUPER.sym, berk */
@@ -386,7 +398,7 @@ S_reference *findStrRecordFromSymbol( S_symbol *sym,
 	ref = NULL;
 	// when in java, then always in qualified name, so access and visibility checks
 	// are useless.
-	rr = findStrRecordSym(iniFind(sym,&rfs),record->name,res,
+	rr = findStrRecordSym(iniFind(sym,&rfs),record->name,res,searchInMembers,
 						  javaClassif, ACC_CHECK_NO, VISIB_CHECK_NO);
 	if (rr == RESULT_OK && rfs.currClass!=NULL &&
 		((*res)->b.storage==StorageField 
@@ -415,6 +427,7 @@ S_reference *findStrRecordFromSymbol( S_symbol *sym,
 S_reference * findStrRecordFromType(	S_typeModifiers *str,
 										S_idIdent *record,
 										S_symbol **res,
+										int searchInMembers,
 										int javaClassif
 									) {
 	S_reference *ref;
@@ -425,7 +438,7 @@ S_reference * findStrRecordFromType(	S_typeModifiers *str,
 		*res = &s_errorSymbol;
 		goto fini;
 	}
-	ref = findStrRecordFromSymbol( str->u.t, record, res, javaClassif, NULL);
+	ref = findStrRecordFromSymbol( str->u.t, record, res, searchInMembers, javaClassif, NULL);
 fini:
 	return(ref);
 }
@@ -601,13 +614,11 @@ void addInitializerRefs(
 		tt = t;
 		rec = NULL;
 		for (id = &ll->idi; id!=NULL; id=id->next) {
-			if (tt->m == TypeArray) {
-				tt = tt->next;
-				continue;
-			}
-			if (tt->m != TypeStruct && tt->m != TypeUnion) return;
-			ref = findStrRecordFromType(tt, id, &rec, CLASS_TO_ANY);
-			if (NULL == ref) return;
+		    if (id->name == NULL) continue;
+			if (tt->m == TypeArray) tt = tt->next;
+			if (tt->m != TypeStruct && tt->m != TypeUnion) break;
+			ref = findStrRecordFromType(tt, id, &rec, SEARCH_IN_MEMBERS_YES, CLASS_TO_ANY);
+			if (NULL == ref) break;
 			assert(rec);
 			tt = rec->u.type;
 		}

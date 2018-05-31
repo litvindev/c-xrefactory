@@ -923,7 +923,7 @@ static int findTopLevelNameInternal(
 			*rscope = cscope;
 		}
 //&fprintf(dumpOut," %s %s\n", miscellaneousName[classif], miscellaneousName[accCheck]);
-		res = findStrRecordSym(resRfs, name, resMemb, classif, accCheck, visibCheck);
+		res = findStrRecordSym(resRfs, name, resMemb, SEARCH_IN_MEMBERS_NO, classif, accCheck, visibCheck);
 	}
 	return(res);
 }
@@ -1452,7 +1452,7 @@ int javaClassifyAmbiguousName(
 			} else {
 				javaLoadClassSymbolsFromFile(pstr);
 				rf = findStrRecordSym(iniFind(pstr,rfs), name->idi.name, str,
-									  classif, ACC_CHECK_NO, VISIB_CHECK_NO);
+									  SEARCH_IN_MEMBERS_NO, classif, ACC_CHECK_NO, VISIB_CHECK_NO);
 				*expr = (*str)->u.type;
 				if (rf == RETURN_OK) {
 					name->nameType = TypeExpression;
@@ -1486,7 +1486,7 @@ int javaClassifyAmbiguousName(
 			} else {
 				javaLoadClassSymbolsFromFile(pexpr->u.t);
 				rr = findStrRecordSym(iniFind(pexpr->u.t,rfs), name->idi.name,
-									  str, classif, ACC_CHECK_NO, VISIB_CHECK_NO);
+									  str, SEARCH_IN_MEMBERS_NO, classif, ACC_CHECK_NO, VISIB_CHECK_NO);
 				if (rr == RESULT_OK) {
 					if ((s_opt.ooChecksBits & OOC_ALL_CHECKS)==0
 						|| javaRecordVisibleAndAccessible(rfs, rfs->baseClass, rfs->currClass, *str)) {
@@ -2237,7 +2237,7 @@ static S_typeModifiers *javaMethodInvocation(
 //&sprintf(tmpBuff,"applicable: %s of %s\n",memb->linkName,rfs->currClass->linkName);ppcGenTmpBuff();
 		}
 		rr = findStrRecordSym(rfs, name->name, &memb, 
-							  CLASS_TO_METHOD, ACC_CHECK_NO, VISIB_CHECK_NO);
+							  SEARCH_IN_MEMBERS_NO, CLASS_TO_METHOD, ACC_CHECK_NO, VISIB_CHECK_NO);
 		if(invocationType==CONSTRUCTOR_INVOCATION&&rfs->baseClass!=rfs->currClass){
 			// constructors are not inherited
 			rr = RETURN_NOT_FOUND;
@@ -2329,7 +2329,7 @@ S_extRecFindStr *javaCrErfsForMethodInvocationT(S_typeModifiers *tt,
 	erfs->params = NULL;
 	javaLoadClassSymbolsFromFile(tt->u.t);
 	rr = findStrRecordSym(iniFind(tt->u.t,&erfs->s), name->name, &erfs->memb, 
-						CLASS_TO_METHOD, ACC_CHECK_NO,VISIB_CHECK_NO);
+						SEARCH_IN_MEMBERS_NO,CLASS_TO_METHOD,ACC_CHECK_NO,VISIB_CHECK_NO);
 	if (rr != RETURN_OK) {
 		noSuchRecordError(name->name);
 		return(NULL);
@@ -2368,7 +2368,7 @@ S_extRecFindStr *javaCrErfsForMethodInvocationS(S_idIdent *super,
 	}
 */
 	rr = findStrRecordSym(iniFind(ss, &erfs->s), name->name, &erfs->memb, 
-						CLASS_TO_METHOD,ACC_CHECK_NO,VISIB_CHECK_NO);
+						SEARCH_IN_MEMBERS_NO,CLASS_TO_METHOD,ACC_CHECK_NO,VISIB_CHECK_NO);
 	if (rr != RETURN_OK) return(NULL);
 	return(erfs);
 }
@@ -2400,7 +2400,7 @@ S_extRecFindStr *javaCrErfsForConstructorInvocation(S_symbol *clas,
 	erfs->params = NULL;
 	assert(clas->b.javaFileLoaded);
 	rr = findStrRecordSym(iniFind(clas, &erfs->s), clas->name, &erfs->memb, 
-						CLASS_TO_METHOD,ACC_CHECK_NO,VISIB_CHECK_NO);
+						SEARCH_IN_MEMBERS_NO,CLASS_TO_METHOD,ACC_CHECK_NO,VISIB_CHECK_NO);
 	if (rr != RETURN_OK) return(NULL);
 	return(erfs);
 }
@@ -2733,7 +2733,7 @@ void javaInitArrayObject() {
 
 S_typeModifiers *javaArrayFieldAccess(S_idIdent *id) {
 	S_symbol *rec=NULL;
-	findStrRecordFromType(&s_javaArrayObjectSymbol.u.s->stype, id, &rec, CLASS_TO_EXPR);
+	findStrRecordFromType(&s_javaArrayObjectSymbol.u.s->stype, id, &rec, SEARCH_IN_MEMBERS_NO, CLASS_TO_EXPR);
 	assert(rec);
 	return(rec->u.type);
 }

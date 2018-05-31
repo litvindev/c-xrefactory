@@ -1521,7 +1521,7 @@ FieldDeclaration:
 						}
 						//&javaSetFieldLinkName(p);
 						iniFind(clas, &rfs);				
-						if (findStrRecordSym(&rfs, p->name, &memb, CLASS_TO_ANY,
+						if (findStrRecordSym(&rfs, p->name, &memb, SEARCH_IN_MEMBERS_NO, CLASS_TO_ANY,
 											 ACC_CHECK_NO,VISIB_CHECK_NO) == RETURN_NOT_FOUND) {
 							assert(clas->u.s);
 							LIST_APPEND(S_symbol, clas->u.s->records, p);
@@ -3517,7 +3517,7 @@ FieldAccess:
 					$$.d.pp = $1.d.pp;
 					if ($1.d.t->m == TypeStruct) {
 						javaLoadClassSymbolsFromFile($1.d.t->u.t);
-						$$.d.r = findStrRecordFromType($1.d.t, $3.d, &rec, CLASS_TO_EXPR);
+						$$.d.r = findStrRecordFromType($1.d.t, $3.d, &rec, SEARCH_IN_MEMBERS_NO, CLASS_TO_EXPR);
 						assert(rec);
 						$$.d.t = rec->u.type;
 					} else if (s_language == LAN_JAVA) {
@@ -3543,7 +3543,7 @@ FieldAccess:
 					ss = javaCurrentSuperClass();
 					if (ss != &s_errorSymbol && ss->b.symType!=TypeError) {
 						javaLoadClassSymbolsFromFile(ss);
-						$$.d.r = findStrRecordFromSymbol(ss, $3.d, &rec, CLASS_TO_EXPR, $1.d);
+						$$.d.r = findStrRecordFromSymbol(ss, $3.d, &rec, SEARCH_IN_MEMBERS_NO, CLASS_TO_EXPR, $1.d);
 						assert(rec);
 						$$.d.t = rec->u.type;
 					} else {
@@ -3567,7 +3567,7 @@ FieldAccess:
 					if (ss != &s_errorSymbol && ss->b.symType!=TypeError) {
 						javaLoadClassSymbolsFromFile(ss);
 						ss = javaGetSuperClass(ss);
-						$$.d.r = findStrRecordFromSymbol(ss, $5.d, &rec, CLASS_TO_EXPR, NULL);
+						$$.d.r = findStrRecordFromSymbol(ss, $5.d, &rec, SEARCH_IN_MEMBERS_NO, CLASS_TO_EXPR, NULL);
 						assert(rec);
 						$$.d.t = rec->u.type;
 					} else {
